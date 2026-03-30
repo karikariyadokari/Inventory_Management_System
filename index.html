@@ -350,6 +350,7 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
   </div>
   <div class="tb-right">
     <span class="tb-alert" id="tbAlert">0件 要発注</span>
+    <button class="tb-btn" onclick="manualLoadFromDrive()" title="Driveから最新データを手動で強制的に読み込みます">☁️ 最新読込</button>
     <button class="tb-btn" onclick="exportData()" title="手動でローカルPCにJSON保存します">💾 バックアップ</button>
     <label class="tb-btn" style="cursor:pointer;" title="ローカルのJSONからデータを復元します">📂 復元<input type="file" accept="application/json" style="display:none" onchange="importData(event)"></label>
     <div class="tb-user">
@@ -1390,6 +1391,19 @@ pdrop.addEventListener('drop',e=>{
     pdrop.classList.add('has');
   }
 });
+
+// Driveから手動で強制的にデータを読み込む
+async function manualLoadFromDrive() {
+  if (!accessToken) {
+    showToast('⚠️ Driveに接続されていません。サインインしてください。');
+    return;
+  }
+  
+  if (confirm('Driveから最新データを読み込みますか？\n※ローカルで同期待ちの変更がある場合、上書きされて消えてしまいます。')) {
+    await loadDataFromDrive();
+  }
+}
+
 </script>
 </body>
 </html>
