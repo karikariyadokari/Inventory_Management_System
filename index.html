@@ -6,49 +6,10 @@
 <title>東武 在庫管理システム</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 
-<!-- =====================================================================
-  ★ Google Drive PDF連携版 セットアップ手順 ★
-  
-  【STEP 1】Google Cloud Console でプロジェクト作成
-    https://console.cloud.google.com/
-    → 「プロジェクトを作成」→ 任意の名前で作成
-
-  【STEP 2】Google Drive API を有効化
-    → 左メニュー「APIとサービス」→「ライブラリ」
-    → 「Google Drive API」を検索して「有効にする」
-
-  【STEP 3】OAuth 2.0 クライアントIDを作成
-    → 「APIとサービス」→「認証情報」→「認証情報を作成」→「OAuthクライアントID」
-    → アプリの種類：「ウェブアプリケーション」
-    → 承認済みJavaScriptオリジン：
-        開発時: http://localhost
-        GitHub Pages: https://あなたのID.github.io
-    → 作成後に表示される「クライアントID」をコピー
-
-  【STEP 4】OAuth同意画面の設定
-    → 「APIとサービス」→「OAuth同意画面」
-    → ユーザーの種類：「外部」→ 必須項目を入力して保存
-    → 「テストユーザー」にアクセス許可するメールアドレスを追加
-    ※ テストモードの間は追加したメールのみログイン可能（本番公開前はこれでOK）
-
-  【STEP 5】下の CLIENT_ID をあなたのクライアントIDに書き換える
-    const CLIENT_ID = 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com';
-
-  【STEP 6】Google Drive で共有フォルダを作成
-    → Driveで「図面PDF」フォルダを作成
-    → アクセス許可したいメールアドレスを「閲覧者」として共有
-    → フォルダのIDをURLからコピー（https://drive.google.com/drive/folders/★ここ★）
-    → 下の DRIVE_FOLDER_ID に貼り付ける
-    const DRIVE_FOLDER_ID = 'YOUR_FOLDER_ID_HERE';
-
-  【STEP 7】GitHub Pages で公開
-    → リポジトリを作成 → このHTMLファイルを index.html としてアップロード
-    → Settings → Pages → Source: main branch → Save
-    → https://あなたのID.github.io/リポジトリ名/ でアクセス可能
-
-====================================================================== -->
-
 <style>
+/* ==========================================================================
+   既存のCSSスタイル（変更なし）
+   ========================================================================== */
 :root {
   --c-bg:        #f0f2f5;
   --c-surface:   #ffffff;
@@ -84,89 +45,42 @@ body { font-family: var(--font); background: var(--c-bg); color: var(--c-text); 
 button { font-family: var(--font); cursor: pointer; }
 input, select, textarea { font-family: var(--font); }
 
-/* ── AUTH SCREEN ── */
-#authScreen {
-  position: fixed; inset: 0; background: var(--c-steel);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 999; flex-direction: column; gap: 0;
-}
-.auth-card {
-  background: #fff; border-radius: 16px; padding: 48px 40px;
-  width: 100%; max-width: 400px; text-align: center;
-  box-shadow: 0 24px 80px rgba(0,0,0,.4);
-}
+#authScreen { position: fixed; inset: 0; background: var(--c-steel); display: flex; align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 0; }
+.auth-card { background: #fff; border-radius: 16px; padding: 48px 40px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 24px 80px rgba(0,0,0,.4); }
 .auth-logo { font-size: 40px; margin-bottom: 12px; }
 .auth-title { font-size: 20px; font-weight: 800; color: var(--c-steel); margin-bottom: 4px; }
 .auth-sub { font-size: 13px; color: var(--c-text3); margin-bottom: 32px; }
-.auth-btn {
-  display: flex; align-items: center; justify-content: center; gap: 12px;
-  width: 100%; padding: 14px 20px; border-radius: 10px;
-  background: #fff; border: 2px solid var(--c-border2);
-  font-size: 15px; font-weight: 700; color: var(--c-text);
-  cursor: pointer; transition: all .15s; margin-bottom: 10px;
-}
+.auth-btn { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 14px 20px; border-radius: 10px; background: #fff; border: 2px solid var(--c-border2); font-size: 15px; font-weight: 700; color: var(--c-text); cursor: pointer; transition: all .15s; margin-bottom: 10px; }
 .auth-btn:hover { background: var(--c-bg); border-color: var(--c-accent); }
 .auth-btn svg { width: 22px; height: 22px; flex-shrink: 0; }
 .auth-note { font-size: 11px; color: var(--c-text3); margin-top: 20px; line-height: 1.6; }
-.auth-user {
-  display: none; align-items: center; gap: 12px;
-  background: var(--c-green-bg); border: 1px solid #b7e5c8;
-  border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;
-  text-align: left;
-}
+.auth-user { display: none; align-items: center; gap: 12px; background: var(--c-green-bg); border: 1px solid #b7e5c8; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; text-align: left; }
 .auth-user.show { display: flex; }
 .auth-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
 .auth-avatar-ph { width: 36px; height: 36px; border-radius: 50%; background: var(--c-accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; }
 .auth-info { flex: 1; min-width: 0; }
 .auth-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .auth-email { font-size: 11px; color: var(--c-text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.auth-denied {
-  display: none; background: var(--c-red-bg); border: 1px solid #f5c6c2;
-  border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;
-  font-size: 12px; color: var(--c-red); text-align: left;
-}
+.auth-denied { display: none; background: var(--c-red-bg); border: 1px solid #f5c6c2; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; font-size: 12px; color: var(--c-red); text-align: left; }
 .auth-denied.show { display: block; }
 
-/* ── SHELL ── */
 #shell { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-
-/* ── TOPBAR ── */
-#topbar {
-  height: var(--header-h);
-  background: var(--c-steel);
-  display: flex; align-items: center;
-  padding: 0 16px; gap: 12px; flex-shrink: 0;
-  position: relative; z-index: 50;
-  box-shadow: 0 2px 8px rgba(0,0,0,.3);
-}
+#topbar { height: var(--header-h); background: var(--c-steel); display: flex; align-items: center; padding: 0 16px; gap: 12px; flex-shrink: 0; position: relative; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,.3); }
 .logo { display: flex; align-items: center; gap: 10px; color: #fff; flex-shrink: 0; }
 .logo-icon { font-size: 22px; }
 .logo-text { font-size: 15px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; }
 .logo-text span { color: #7dd3fc; }
 .tb-sep { width: 1px; height: 28px; background: rgba(255,255,255,.15); flex-shrink: 0; }
 .tb-search { flex: 1; max-width: 380px; position: relative; }
-.tb-search input {
-  width: 100%; background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.15);
-  border-radius: 6px; color: #fff; padding: 7px 10px 7px 32px; font-size: 13px; outline: none;
-  transition: background .15s, border-color .15s;
-}
+.tb-search input { width: 100%; background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.15); border-radius: 6px; color: #fff; padding: 7px 10px 7px 32px; font-size: 13px; outline: none; transition: background .15s, border-color .15s; }
 .tb-search input::placeholder { color: rgba(255,255,255,.45); }
 .tb-search input:focus { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.35); }
 .tb-search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,.5); font-size: 14px; pointer-events: none; }
 .tb-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-.tb-alert {
-  background: #e74c3c; color: #fff; font-size: 11px; font-weight: 700;
-  padding: 3px 10px; border-radius: 12px; white-space: nowrap; display: none;
-}
-.tb-btn {
-  background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.18);
-  color: rgba(255,255,255,.85); padding: 6px 12px; border-radius: 6px;
-  font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 5px;
-  transition: all .15s; white-space: nowrap;
-}
+.tb-alert { background: #e74c3c; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; white-space: nowrap; display: none; }
+.tb-btn { background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.18); color: rgba(255,255,255,.85); padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 5px; transition: all .15s; white-space: nowrap; }
 .tb-btn:hover { background: rgba(255,255,255,.20); color: #fff; }
 
-/* ユーザーアバター（ヘッダー） */
 .tb-user { display: flex; align-items: center; gap: 8px; }
 .tb-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,.3); }
 .tb-avatar-ph { width: 30px; height: 30px; border-radius: 50%; background: var(--c-accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; border: 2px solid rgba(255,255,255,.3); flex-shrink: 0; }
@@ -174,23 +88,11 @@ input, select, textarea { font-family: var(--font); }
 
 #hamburger { display: none; background: none; border: none; color: #fff; font-size: 22px; padding: 4px; cursor: pointer; }
 
-/* ── BODY ── */
 #body { flex: 1; display: flex; overflow: hidden; }
-
-/* ── SIDEBAR ── */
-#sidebar {
-  width: var(--sidebar-w); background: var(--c-surface);
-  border-right: 1px solid var(--c-border);
-  display: flex; flex-direction: column; flex-shrink: 0;
-  overflow-y: auto; transition: transform .25s ease;
-}
+#sidebar { width: var(--sidebar-w); background: var(--c-surface); border-right: 1px solid var(--c-border); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; transition: transform .25s ease; }
 .sb-section { padding: 14px 10px 6px; }
 .sb-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--c-text3); padding: 0 6px; margin-bottom: 6px; }
-.nav-item {
-  display: flex; align-items: center; gap: 9px; padding: 9px 10px;
-  border-radius: var(--r); color: var(--c-text2); font-size: 13px; font-weight: 500;
-  cursor: pointer; transition: all .12s; position: relative;
-}
+.nav-item { display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: var(--r); color: var(--c-text2); font-size: 13px; font-weight: 500; cursor: pointer; transition: all .12s; position: relative; }
 .nav-item:hover { background: var(--c-bg); color: var(--c-text); }
 .nav-item.active { background: var(--c-accent-bg); color: var(--c-accent); font-weight: 600; }
 .nav-item .ni { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
@@ -198,39 +100,22 @@ input, select, textarea { font-family: var(--font); }
 .sb-divider { height: 1px; background: var(--c-border); margin: 6px 10px; }
 .sb-filter { padding: 0 10px 12px; }
 .sb-filter-title { font-size: 10px; font-weight: 700; color: var(--c-text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 5px; margin-top: 10px; }
-.sb-select {
-  width: 100%; background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--r);
-  color: var(--c-text); padding: 8px 28px 8px 10px; font-size: 12px; outline: none; cursor: pointer;
-  -webkit-appearance: none; appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239099a8'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 9px center;
-}
+.sb-select { width: 100%; background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--r); color: var(--c-text); padding: 8px 28px 8px 10px; font-size: 12px; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239099a8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; }
 .sb-select:focus { border-color: var(--c-accent); }
 
-/* Drive同期ステータス */
-.drive-status {
-  margin: 6px 10px 10px; padding: 8px 10px;
-  border-radius: var(--r); font-size: 11px; font-weight: 600;
-  display: flex; align-items: center; gap: 6px;
-}
+.drive-status { margin: 6px 10px 10px; padding: 8px 10px; border-radius: var(--r); font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
 .drive-status.ok { background: var(--c-green-bg); color: var(--c-green); }
 .drive-status.warn { background: var(--c-yellow-bg); color: var(--c-yellow); }
 .drive-status.err { background: var(--c-red-bg); color: var(--c-red); }
 
-/* ── CONTENT ── */
 #content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
 .page { display: none; flex-direction: column; flex: 1; overflow: hidden; }
 .page.active { display: flex; }
 
-/* ── DASHBOARD ── */
 #page-dash { overflow-y: auto; }
 .dash-inner { padding: 20px; display: flex; flex-direction: column; gap: 18px; max-width: 1400px; }
 .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.kpi-card {
-  background: var(--c-surface); border: 1px solid var(--c-border);
-  border-radius: var(--r-lg); padding: 16px 18px;
-  box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 5px;
-}
+.kpi-card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-lg); padding: 16px 18px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 5px; }
 .kpi-icon { font-size: 20px; }
 .kpi-val { font-size: 32px; font-weight: 900; font-family: var(--mono); line-height: 1.1; }
 .kpi-lbl { font-size: 12px; color: var(--c-text2); font-weight: 500; }
@@ -266,11 +151,7 @@ input, select, textarea { font-family: var(--font); }
 .tl-chg.minus { color: var(--c-red); }
 .tl-time { font-size: 10px; color: var(--c-text3); margin-top: 2px; }
 
-/* ── INVENTORY ── */
-.inv-bar {
-  padding: 10px 14px; background: var(--c-surface); border-bottom: 1px solid var(--c-border);
-  display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap;
-}
+.inv-bar { padding: 10px 14px; background: var(--c-surface); border-bottom: 1px solid var(--c-border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
 .count-chip { background: var(--c-accent-bg); color: var(--c-accent); font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 12px; }
 .bar-right { margin-left: auto; display: flex; gap: 7px; }
 .btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 13px; border-radius: var(--r); font-size: 13px; font-weight: 600; border: 1px solid transparent; cursor: pointer; transition: all .12s; white-space: nowrap; }
@@ -286,13 +167,7 @@ input, select, textarea { font-family: var(--font); }
 
 .tbl-wrap { flex: 1; overflow: auto; }
 table.itbl { width: 100%; border-collapse: collapse; min-width: 860px; }
-table.itbl thead th {
-  background: var(--c-steel); color: rgba(255,255,255,.82); padding: 10px 11px;
-  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
-  white-space: nowrap; position: sticky; top: 0; z-index: 5;
-  border-right: 1px solid rgba(255,255,255,.08); cursor: pointer; user-select: none;
-  transition: background .12s;
-}
+table.itbl thead th { background: var(--c-steel); color: rgba(255,255,255,.82); padding: 10px 11px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; white-space: nowrap; position: sticky; top: 0; z-index: 5; border-right: 1px solid rgba(255,255,255,.08); cursor: pointer; user-select: none; transition: background .12s; }
 table.itbl thead th:last-child { border-right: none; cursor: default; }
 table.itbl thead th:hover:not(:last-child) { background: #3d5166; }
 table.itbl thead th.sorted { background: #1a3c57; }
@@ -316,18 +191,11 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
 .badge-alert { display: inline-block; background: var(--c-red); color: #fff; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; margin-left: 4px; vertical-align: middle; }
 .c-act { display: flex; gap: 4px; align-items: center; white-space: nowrap; }
 
-/* PDF アップロード進捗 */
-.pdf-progress {
-  display: none; position: fixed; bottom: 20px; right: 20px;
-  background: var(--c-steel); color: #fff; border-radius: 10px;
-  padding: 12px 16px; font-size: 13px; z-index: 500;
-  box-shadow: var(--shadow-lg); min-width: 200px;
-}
+.pdf-progress { display: none; position: fixed; bottom: 20px; right: 20px; background: var(--c-steel); color: #fff; border-radius: 10px; padding: 12px 16px; font-size: 13px; z-index: 500; box-shadow: var(--shadow-lg); min-width: 200px; }
 .pdf-progress.show { display: block; }
 .pdf-prog-bar { height: 4px; background: rgba(255,255,255,.2); border-radius: 2px; margin-top: 8px; overflow: hidden; }
 .pdf-prog-fill { height: 100%; background: #7dd3fc; border-radius: 2px; transition: width .3s; width: 0%; }
 
-/* ── FORM ── */
 #page-add { overflow-y: auto; }
 .form-wrap { max-width: 860px; margin: 22px auto; padding: 0 20px 60px; }
 .form-title { font-size: 17px; font-weight: 800; margin-bottom: 14px; color: var(--c-steel); }
@@ -344,34 +212,22 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
 .form-field:last-child { border-right: none; }
 .form-label { font-size: 11px; font-weight: 700; color: var(--c-text2); }
 .req { color: var(--c-red); margin-left: 2px; }
-.form-input, .form-select {
-  background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--r);
-  color: var(--c-text); font-size: 14px; padding: 9px 11px; outline: none;
-  transition: border-color .15s, box-shadow .15s; width: 100%; -webkit-appearance: none;
-}
+.form-input, .form-select { background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--r); color: var(--c-text); font-size: 14px; padding: 9px 11px; outline: none; transition: border-color .15s, box-shadow .15s; width: 100%; -webkit-appearance: none; }
 .form-input:focus, .form-select:focus { border-color: var(--c-accent); box-shadow: 0 0 0 3px rgba(26,86,219,.10); }
-.form-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239099a8'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 11px center; padding-right: 30px;
-}
+.form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239099a8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; padding-right: 30px; }
 .form-hint { font-size: 11px; color: var(--c-text3); }
-.pdf-drop {
-  background: var(--c-surface2); border: 2px dashed var(--c-border2); border-radius: var(--r);
-  padding: 18px; text-align: center; color: var(--c-text3); cursor: pointer; transition: all .15s; font-size: 13px;
-}
+.pdf-drop { background: var(--c-surface2); border: 2px dashed var(--c-border2); border-radius: var(--r); padding: 18px; text-align: center; color: var(--c-text3); cursor: pointer; transition: all .15s; font-size: 13px; }
 .pdf-drop:hover { border-color: var(--c-accent); color: var(--c-accent); }
 .pdf-drop.has { border-color: var(--c-green); color: var(--c-green); background: var(--c-green-bg); }
 .pdf-drop.uploading { border-color: var(--c-accent); color: var(--c-accent); background: var(--c-accent-bg); cursor: wait; }
 .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
 .form-actions .btn { padding: 10px 22px; font-size: 14px; }
 
-/* ── HISTORY ── */
 .hist-bar { padding: 10px 14px; background: var(--c-surface); border-bottom: 1px solid var(--c-border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
 .hist-sel { background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--r); color: var(--c-text); padding: 7px 28px 7px 10px; font-size: 12px; outline: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239099a8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; }
 .hist-cnt { font-size: 12px; color: var(--c-text3); }
 .hist-list { flex: 1; overflow-y: auto; }
 
-/* ── MODAL ── */
 .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; backdrop-filter: blur(2px); align-items: center; justify-content: center; padding: 20px; }
 .overlay.open { display: flex; }
 .modal { background: var(--c-surface); border-radius: var(--r-lg); border: 1px solid var(--c-border); box-shadow: var(--shadow-lg); width: 100%; max-width: 460px; animation: popIn .18s ease; overflow: hidden; }
@@ -383,7 +239,6 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
 .modal-body { padding: 18px; }
 .modal-footer { padding: 12px 18px; border-top: 1px solid var(--c-border); display: flex; gap: 8px; justify-content: flex-end; }
 
-/* Stock modal */
 .sm-ctx { background: var(--c-surface2); border-radius: var(--r); padding: 11px 13px; margin-bottom: 16px; }
 .sm-ctx .sm-pn { font-family: var(--mono); font-size: 11px; color: var(--c-accent); font-weight: 600; }
 .sm-ctx .sm-name { font-size: 15px; font-weight: 700; margin: 2px 0; }
@@ -402,7 +257,6 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
 .pv.ok { color: var(--c-green); }
 .pv.warn { color: var(--c-red); }
 
-/* Detail modal */
 .detail-qty { text-align: center; padding: 16px 0; border-bottom: 1px solid var(--c-border); margin-bottom: 16px; }
 .dq-num { font-size: 48px; font-weight: 900; font-family: var(--mono); line-height: 1; }
 .dq-num.ok { color: var(--c-green); }
@@ -416,24 +270,13 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
 .dv { font-size: 13px; font-weight: 600; }
 .dv.mono { font-family: var(--mono); color: var(--c-accent); }
 
-/* Empty state */
 .empty { text-align: center; padding: 48px 20px; color: var(--c-text3); }
 .ei { font-size: 36px; margin-bottom: 10px; }
 .empty p { font-size: 14px; }
 
-/* Mobile nav */
 #mnav { display: none; }
-
-/* Toast */
-.toast {
-  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px);
-  background: var(--c-steel); color: #fff; padding: 10px 20px;
-  border-radius: 24px; font-size: 13px; font-weight: 600;
-  opacity: 0; transition: all .25s; pointer-events: none; z-index: 900; white-space: nowrap;
-}
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--c-steel); color: #fff; padding: 10px 20px; border-radius: 24px; font-size: 13px; font-weight: 600; opacity: 0; transition: all .25s; pointer-events: none; z-index: 900; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* Sidebar backdrop (mobile) */
 #sb-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 99; }
 
 @media (max-width: 768px) {
@@ -445,16 +288,8 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
   .dash-cols { grid-template-columns: 1fr; }
   .form-row.c4 { grid-template-columns: 1fr 1fr; }
   .form-row.c3 { grid-template-columns: 1fr 1fr; }
-  #mnav {
-    display: flex; background: var(--c-surface); border-top: 1px solid var(--c-border);
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
-    box-shadow: 0 -2px 10px rgba(0,0,0,.08);
-  }
-  .mn-item {
-    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 8px 4px; font-size: 10px; color: var(--c-text3); cursor: pointer;
-    position: relative; transition: color .12s;
-  }
+  #mnav { display: flex; background: var(--c-surface); border-top: 1px solid var(--c-border); position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; box-shadow: 0 -2px 10px rgba(0,0,0,.08); }
+  .mn-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 4px; font-size: 10px; color: var(--c-text3); cursor: pointer; position: relative; transition: color .12s; }
   .mn-item.active { color: var(--c-accent); }
   .mni { font-size: 18px; margin-bottom: 2px; }
   .mn-badge { position: absolute; top: 6px; right: calc(50% - 16px); background: var(--c-red); color: #fff; font-size: 9px; font-weight: 700; padding: 1px 4px; border-radius: 8px; }
@@ -464,9 +299,6 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════ -->
-<!-- 認証画面 -->
-<!-- ══════════════════════════════════════════════ -->
 <div id="authScreen">
   <div class="auth-card">
     <div class="auth-logo">🔩</div>
@@ -500,17 +332,9 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
     <button class="auth-btn" id="authSignOutBtn" onclick="handleSignOut()" style="display:none; background:var(--c-red-bg); border-color:#f5c6c2; color:var(--c-red);">
       サインアウト
     </button>
-
-    <div class="auth-note">
-      ※ 認証済みのGoogleアカウントのみアクセス可能です<br>
-      図面PDFはGoogle Driveに安全に保存されます
-    </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════ -->
-<!-- メインアプリ -->
-<!-- ══════════════════════════════════════════════ -->
 <div id="shell" style="display:none;">
 
 <div id="topbar">
@@ -526,9 +350,8 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
   </div>
   <div class="tb-right">
     <span class="tb-alert" id="tbAlert">0件 要発注</span>
-    <button class="tb-btn" onclick="exportData()">💾 バックアップ</button>
-    <label class="tb-btn" style="cursor:pointer;">📂 復元<input type="file" accept="application/json" style="display:none" onchange="importData(event)"></label>
-    <!-- ログインユーザー表示 -->
+    <button class="tb-btn" onclick="exportData()" title="手動でローカルPCにJSON保存します">💾 バックアップ</button>
+    <label class="tb-btn" style="cursor:pointer;" title="ローカルのJSONからデータを復元します">📂 復元<input type="file" accept="application/json" style="display:none" onchange="importData(event)"></label>
     <div class="tb-user">
       <div class="tb-avatar-ph" id="tbAvatarPh">?</div>
       <img class="tb-avatar" id="tbAvatarImg" src="" alt="" style="display:none">
@@ -551,9 +374,8 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
       <div class="nav-item" id="nav-hist" onclick="switchPage('hist')"><span class="ni">🕒</span>入出庫履歴</div>
     </div>
     <div class="sb-divider"></div>
-    <!-- Drive同期ステータス -->
     <div class="drive-status warn" id="driveStatus">
-      <span>☁️</span><span id="driveStatusText">Drive 未接続</span>
+      <span id="driveStatusIcon">☁️</span><span id="driveStatusText">Drive 未接続</span>
     </div>
     <div class="sb-section">
       <div class="sb-label">絞り込み</div>
@@ -575,7 +397,6 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
 
   <div id="content">
 
-    <!-- DASHBOARD -->
     <div class="page active" id="page-dash">
       <div class="dash-inner">
         <div class="kpi-grid">
@@ -597,7 +418,6 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
       </div>
     </div>
 
-    <!-- INVENTORY -->
     <div class="page" id="page-inv">
       <div class="inv-bar">
         <span class="count-chip" id="invCount">0件</span>
@@ -628,7 +448,6 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
       </div>
     </div>
 
-    <!-- ADD/EDIT -->
     <div class="page" id="page-add">
       <div class="form-wrap">
         <div class="form-title" id="formTitle">📋 新規在庫登録</div>
@@ -705,7 +524,6 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
                   <span id="pdfLabel">📄 クリックまたはドラッグ＆ドロップでPDFを追加<br><small style="font-size:11px;opacity:.7;">Google Driveにアップロードされます</small></span>
                 </div>
                 <input type="file" id="f-pdf" accept="application/pdf" style="display:none" onchange="onPdfSel(this)">
-                <!-- 既存PDFリンク -->
                 <div id="existingPdfLink" style="display:none;margin-top:8px;">
                   <a id="existingPdfAnchor" href="#" target="_blank" class="btn btn-ghost btn-sm">📄 現在の図面PDFを開く（Google Drive）</a>
                   <button class="btn btn-danger btn-sm" onclick="removePdfLink()">削除</button>
@@ -721,7 +539,6 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
       </div>
     </div>
 
-    <!-- HISTORY -->
     <div class="page" id="page-hist">
       <div class="hist-bar">
         <select class="hist-sel" id="histOp" onchange="renderHistory()">
@@ -740,11 +557,7 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
       <div class="hist-list" id="histList"></div>
     </div>
 
-  </div><!-- /content -->
-</div><!-- /body -->
-
-<!-- Mobile nav -->
-<div id="mnav">
+  </div></div><div id="mnav">
   <div class="mn-item active" id="mn-dash" onclick="switchPage('dash')"><span class="mni">📊</span><span>ダッシュ</span></div>
   <div class="mn-item" id="mn-inv" onclick="switchPage('inv')">
     <span class="mni">📦</span><span>在庫</span>
@@ -754,10 +567,7 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
   <div class="mn-item" id="mn-hist" onclick="switchPage('hist')"><span class="mni">🕒</span><span>履歴</span></div>
 </div>
 
-</div><!-- /shell -->
-
-<!-- Stock modal -->
-<div class="overlay" id="stockModal">
+</div><div class="overlay" id="stockModal">
   <div class="modal">
     <div class="modal-hd">
       <div class="modal-title" id="sm-title">入出庫</div>
@@ -787,7 +597,6 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
   </div>
 </div>
 
-<!-- Detail modal -->
 <div class="overlay" id="detailModal">
   <div class="modal" style="max-width:520px;">
     <div class="modal-hd">
@@ -801,37 +610,40 @@ table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px
 
 <div class="toast" id="toast"></div>
 
-<!-- PDFアップロード進捗 -->
 <div class="pdf-progress" id="pdfProgress">
-  <div id="pdfProgressText">📤 Drive にアップロード中...</div>
+  <div id="pdfProgressText">📤 Drive に処理中...</div>
   <div class="pdf-prog-bar"><div class="pdf-prog-fill" id="pdfProgFill"></div></div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════ -->
-<!-- Google Identity Services -->
-<!-- ══════════════════════════════════════════════════════════════ -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <script>
 // ══════════════════════════════════════════════════════════════
-// ★ ここを書き換えてください ★
+// ★ 設定箇所 ★
 // ══════════════════════════════════════════════════════════════
-const CLIENT_ID     = '630606778948-4unso23tped3nfa6b91o6a7o7g5sdkfj.apps.googleusercontent.com';
+const CLIENT_ID       = '630606778948-4unso23tped3nfa6b91o6a7o7g5sdkfj.apps.googleusercontent.com';
 const DRIVE_FOLDER_ID = '1h72wKsljozEoZux0uJGzlvYP512A7ShN'; // Google DriveのフォルダID
 
 // アクセスを許可するメールアドレスのリスト
-// （空配列にするとGoogleログインできる全員がアクセス可能）
-const ALLOWED_EMAILS = [
-  // 'user@example.com',
-  // 'another@example.com',
-];
+const ALLOWED_EMAILS = [];
 // ══════════════════════════════════════════════════════════════
 
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+const DATA_FILE_NAME = 'inventory_data.json'; // 保存されるJSONファイル名
 
 let tokenClient;
 let accessToken = null;
-let currentUser  = null; // { name, email, picture }
+let currentUser  = null;
+
+// JSON同期用変数
+let dataFileId = null;
+let dataModifiedTime = null;
+let syncTimer = null;
+let isSyncing = false;
+let pendingSync = false;
+
+// ローカルデータ初期化
+let data = JSON.parse(localStorage.getItem('inv_v7') || '{"inventory":[],"logs":[]}');
 
 // ── Google Identity Services 初期化 ──
 window.onload = () => {
@@ -843,19 +655,17 @@ window.onload = () => {
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
-    callback: (tokenResponse) => {
-      if (tokenResponse.error) { showToast('⚠ Drive接続に失敗しました'); return; }
+    callback: async (tokenResponse) => {
+      // ユーザーが手動でトークン再リクエストした場合のコールバック
+      if (tokenResponse.error) return;
       accessToken = tokenResponse.access_token;
-      updateDriveStatus(true);
     },
   });
 };
 
-// ── サインイン ──
 function handleSignIn() {
   google.accounts.id.prompt((notification) => {
     if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-      // ポップアップが出ない場合はワンタップを使わず直接OAuthフローへ
       google.accounts.id.renderButton(
         document.getElementById('authSignInBtn'),
         { theme: 'outline', size: 'large', width: 320 }
@@ -864,30 +674,33 @@ function handleSignIn() {
   });
 }
 
-// ── IDトークン受け取り ──
 function handleCredentialResponse(response) {
   const payload = parseJwt(response.credential);
   const email   = payload.email;
 
-  // アクセス制限チェック
   if (ALLOWED_EMAILS.length > 0 && !ALLOWED_EMAILS.includes(email)) {
     currentUser = { name: payload.name, email, picture: payload.picture };
     showAuthDenied();
     return;
   }
-
   currentUser = { name: payload.name, email, picture: payload.picture };
   onAuthSuccess();
 }
 
 function onAuthSuccess() {
-  // 認証画面を非表示にしてメインアプリを表示
   document.getElementById('authScreen').style.display = 'none';
   document.getElementById('shell').style.display = 'flex';
   updateHeaderUser();
+  
+  // まずはローカルのキャッシュデータで即時描画
   boot();
 
-  // Drive APIトークンをリクエスト（PDFアップロードに必要）
+  // Drive APIトークンをリクエストし、取得後にDrive上のJSONを読み込む
+  tokenClient.callback = async (tokenResponse) => {
+    if (tokenResponse.error) { showToast('⚠ Drive接続に失敗しました'); return; }
+    accessToken = tokenResponse.access_token;
+    await loadDataFromDrive(); // 最新のデータをDriveから読み込み
+  };
   tokenClient.requestAccessToken({ prompt: '' });
 }
 
@@ -910,8 +723,7 @@ function showAuthDenied() {
 
 function handleSignOut() {
   google.accounts.id.disableAutoSelect();
-  accessToken = null;
-  currentUser = null;
+  accessToken = null; currentUser = null; dataFileId = null;
   document.getElementById('shell').style.display = 'none';
   document.getElementById('authScreen').style.display = 'flex';
   document.getElementById('authDenied').classList.remove('show');
@@ -932,82 +744,193 @@ function updateHeaderUser() {
   }
 }
 
-function updateDriveStatus(connected) {
-  const el = document.getElementById('driveStatus');
-  const tx = document.getElementById('driveStatusText');
-  if (connected) {
-    el.className = 'drive-status ok';
-    tx.textContent = 'Drive 接続済み';
-  } else {
-    el.className = 'drive-status warn';
-    tx.textContent = 'Drive 未接続';
-  }
-}
-
 function parseJwt(token) {
   const base64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
   return JSON.parse(decodeURIComponent(atob(base64).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')));
 }
 
 // ══════════════════════════════════════════════════════════════
-// Google Drive API
+// ☁️ データ同期 (楽観的UI & 競合判定付き)
 // ══════════════════════════════════════════════════════════════
 
-// PDFをDriveにアップロード → ファイルIDを返す
-async function uploadPdfToDrive(file, fileName) {
-  if (!accessToken) {
-    // トークンを再取得してリトライ
-    return new Promise((resolve, reject) => {
-      tokenClient.callback = async (tokenResponse) => {
-        if (tokenResponse.error) { reject(new Error('Drive認証失敗')); return; }
-        accessToken = tokenResponse.access_token;
-        updateDriveStatus(true);
-        const id = await _doUpload(file, fileName);
-        resolve(id);
-      };
-      tokenClient.requestAccessToken({ prompt: '' });
-    });
+function updateSyncStatus(status, text) {
+  const el = document.getElementById('driveStatus');
+  const tx = document.getElementById('driveStatusText');
+  const ic = document.getElementById('driveStatusIcon');
+  if (status === 'ok') {
+    el.className = 'drive-status ok';
+    ic.textContent = '☁️';
+    tx.textContent = text || '同期済み';
+  } else if (status === 'syncing') {
+    el.className = 'drive-status warn';
+    ic.textContent = '⏳';
+    tx.textContent = text || '同期待機・処理中...';
+  } else if (status === 'err') {
+    el.className = 'drive-status err';
+    ic.textContent = '⚠️';
+    tx.textContent = text || '同期エラー';
+  } else {
+    el.className = 'drive-status warn';
+    ic.textContent = '☁️';
+    tx.textContent = text || '未接続';
   }
+}
+
+// 【楽観的UI更新】ローカル保存 + UI描画し、3秒後にDriveへ同期予約
+function save() {
+  try { localStorage.setItem('inv_v7', JSON.stringify(data)); } catch(e) {}
+  renderAll(); // 操作結果を即座にUIへ反映
+
+  if (!accessToken) return;
+
+  updateSyncStatus('syncing', '3秒後に同期...');
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(syncToDrive, 3000);
+}
+
+// DriveへのJSON保存処理（衝突判定付き）
+async function syncToDrive() {
+  if (!accessToken || !dataFileId) return;
+  if (isSyncing) {
+    pendingSync = true;
+    return;
+  }
+  isSyncing = true;
+  updateSyncStatus('syncing', 'Driveへ保存中...');
+
+  try {
+    // 1. まずDrive上の最新の modifiedTime を取得し、衝突がないかチェック
+    const checkRes = await fetch(`https://www.googleapis.com/drive/v3/files/${dataFileId}?fields=modifiedTime`, {
+      headers: { Authorization: 'Bearer ' + accessToken }
+    });
+    if (!checkRes.ok) throw new Error('メタデータ取得失敗');
+    const meta = await checkRes.json();
+
+    // 衝突判定 (Drive側が新しければ)
+    if (dataModifiedTime && meta.modifiedTime !== dataModifiedTime) {
+      isSyncing = false;
+      const msg = '⚠️ データの衝突を検知しました\n他のデバイスでデータが更新されています。\n\n[OK] 最新データを読み込む (あなたの未保存の変更は破棄されます)\n[キャンセル] あなたの変更で上書きする';
+      if (confirm(msg)) {
+        await loadDataFromDrive(); // 他の人の更新を取り込む
+      } else {
+        // 強制上書きの意志が示された場合、タイムスタンプを合わせて再実行
+        dataModifiedTime = meta.modifiedTime;
+        syncToDrive();
+      }
+      return;
+    }
+
+    // 2. 衝突がなければ PATCH で上書き保存
+    const content = JSON.stringify(data);
+    const updateRes = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${dataFileId}?uploadType=media&fields=id,modifiedTime`, {
+      method: 'PATCH',
+      headers: { 
+        'Authorization': 'Bearer ' + accessToken,
+        'Content-Type': 'application/json'
+      },
+      body: content
+    });
+
+    if (!updateRes.ok) throw new Error('アップロード失敗');
+    const updatedMeta = await updateRes.json();
+    dataModifiedTime = updatedMeta.modifiedTime; // 成功したら新しいタイムスタンプを保持
+    
+    updateSyncStatus('ok', '同期完了');
+    showToast('☁️ Driveに同期しました');
+
+  } catch (err) {
+    console.error(err);
+    updateSyncStatus('err');
+    showToast('⚠️ 同期エラー: ' + err.message);
+  } finally {
+    isSyncing = false;
+    if (pendingSync) {
+      pendingSync = false;
+      syncTimer = setTimeout(syncToDrive, 1000);
+    }
+  }
+}
+
+// 初期ロード処理：DriveからJSONを読み込む。無ければ作成する。
+async function loadDataFromDrive() {
+  updateSyncStatus('syncing', 'Driveから読み込み中...');
+  try {
+    const q = encodeURIComponent(`name='${DATA_FILE_NAME}' and '${DRIVE_FOLDER_ID}' in parents and trashed=false`);
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,modifiedTime)`, {
+      headers: { Authorization: 'Bearer ' + accessToken }
+    });
+    const result = await res.json();
+
+    if (result.files && result.files.length > 0) {
+      // 既存ファイルあり → ダウンロードして適用
+      dataFileId = result.files[0].id;
+      dataModifiedTime = result.files[0].modifiedTime;
+      
+      const dlRes = await fetch(`https://www.googleapis.com/drive/v3/files/${dataFileId}?alt=media`, {
+        headers: { Authorization: 'Bearer ' + accessToken }
+      });
+      const driveData = await dlRes.json();
+      data = driveData;
+      localStorage.setItem('inv_v7', JSON.stringify(data));
+      renderAll();
+      updateSyncStatus('ok', '同期済み');
+      showToast('☁️ Driveから最新データを読み込みました');
+    } else {
+      // 存在しない場合 → 現在のローカルデータを元にDrive上に新規作成
+      const content = JSON.stringify(data);
+      const metadata = { name: DATA_FILE_NAME, mimeType: 'application/json', parents: DRIVE_FOLDER_ID ? [DRIVE_FOLDER_ID] : [] };
+      
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', new Blob([content], { type: 'application/json' }));
+      
+      const upRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,modifiedTime', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + accessToken },
+        body: form
+      });
+      const upData = await upRes.json();
+      dataFileId = upData.id;
+      dataModifiedTime = upData.modifiedTime;
+      updateSyncStatus('ok', '同期済み');
+    }
+  } catch (e) {
+    console.error(e);
+    updateSyncStatus('err', 'Drive連携エラー');
+    // エラーが起きてもローカルデータで動作は続行する
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Google Drive API (PDF用)
+// ══════════════════════════════════════════════════════════════
+
+async function uploadPdfToDrive(file, fileName) {
+  if (!accessToken) throw new Error('未接続');
   return _doUpload(file, fileName);
 }
 
 async function _doUpload(file, fileName) {
   showPdfProgress(0, '📤 Drive にアップロード中...');
-
-  const metadata = {
-    name: fileName,
-    mimeType: 'application/pdf',
-    parents: DRIVE_FOLDER_ID ? [DRIVE_FOLDER_ID] : [],
-  };
-
+  const metadata = { name: fileName, mimeType: 'application/pdf', parents: DRIVE_FOLDER_ID ? [DRIVE_FOLDER_ID] : [] };
   const form = new FormData();
   form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
   form.append('file', file);
-
   const xhr = new XMLHttpRequest();
   xhr.open('POST', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink');
   xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-
   return new Promise((resolve, reject) => {
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) showPdfProgress(Math.round(e.loaded/e.total*100), '📤 アップロード中...');
-    };
+    xhr.upload.onprogress = (e) => { if (e.lengthComputable) showPdfProgress(Math.round(e.loaded/e.total*100), '📤 アップロード中...'); };
     xhr.onload = () => {
       hidePdfProgress();
-      if (xhr.status === 200) {
-        const res = JSON.parse(xhr.responseText);
-        resolve(res); // { id, webViewLink }
-      } else {
-        console.error('Drive upload error:', xhr.responseText);
-        reject(new Error('アップロード失敗: ' + xhr.status));
-      }
+      if (xhr.status === 200) resolve(JSON.parse(xhr.responseText));
+      else reject(new Error('アップロード失敗: ' + xhr.status));
     };
     xhr.onerror = () => { hidePdfProgress(); reject(new Error('ネットワークエラー')); };
     xhr.send(form);
   });
 }
 
-// 既存ファイルを上書きアップロード
 async function updatePdfInDrive(fileId, file) {
   showPdfProgress(0, '📤 Drive を更新中...');
   const xhr = new XMLHttpRequest();
@@ -1015,35 +938,16 @@ async function updatePdfInDrive(fileId, file) {
   xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
   xhr.setRequestHeader('Content-Type', 'application/pdf');
   return new Promise((resolve, reject) => {
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) showPdfProgress(Math.round(e.loaded/e.total*100), '📤 更新中...');
-    };
-    xhr.onload = () => {
-      hidePdfProgress();
-      if (xhr.status === 200) resolve(JSON.parse(xhr.responseText));
-      else reject(new Error('更新失敗: ' + xhr.status));
-    };
+    xhr.upload.onprogress = (e) => { if (e.lengthComputable) showPdfProgress(Math.round(e.loaded/e.total*100), '📤 更新中...'); };
+    xhr.onload = () => { hidePdfProgress(); if (xhr.status === 200) resolve(JSON.parse(xhr.responseText)); else reject(new Error('更新失敗')); };
     xhr.onerror = () => { hidePdfProgress(); reject(new Error('ネットワークエラー')); };
     xhr.send(file);
   });
 }
 
-// DriveのファイルIDからWebViewLinkを取得
-async function getDriveFileLink(fileId) {
-  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?fields=webViewLink`, {
-    headers: { Authorization: 'Bearer ' + accessToken }
-  });
-  const data = await res.json();
-  return data.webViewLink;
-}
-
-// Driveのファイルを削除
 async function deleteDriveFile(fileId) {
   if (!accessToken || !fileId) return;
-  await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
-    method: 'DELETE',
-    headers: { Authorization: 'Bearer ' + accessToken }
-  });
+  await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, { method: 'DELETE', headers: { Authorization: 'Bearer ' + accessToken } });
 }
 
 function showPdfProgress(pct, msg) {
@@ -1052,25 +956,21 @@ function showPdfProgress(pct, msg) {
   document.getElementById('pdfProgressText').textContent = msg;
   document.getElementById('pdfProgFill').style.width = pct + '%';
 }
-function hidePdfProgress() {
-  document.getElementById('pdfProgress').classList.remove('show');
-}
+function hidePdfProgress() { document.getElementById('pdfProgress').classList.remove('show'); }
 
 // ══════════════════════════════════════════════════════════════
 // アプリ本体
 // ══════════════════════════════════════════════════════════════
 
 const COMPANIES = ['オリエント工機(株)','(株)アイテック','(株)日清エンジニアリング','(株)児嶋鉄工所','三ツ星ベルト販売(株)','新興機械工業(株)','(株)正栄製作所（法）','(株)正栄製作所（庄）','(株)不二鉄工所','日立造船(株)','住友精密工業(株)'];
-let data = JSON.parse(localStorage.getItem('inv_v7') || '{"inventory":[],"logs":[]}');
 let editId = null, pendingPdf = null, stockTarget = null, stockSign = 1;
 let alertOnly = false, sortCol = 'tag', sortDir = 1;
 let removePdfFlag = false;
 
 function boot() { buildLists(); renderAll(); }
-function save() { try { localStorage.setItem('inv_v7', JSON.stringify(data)); } catch(e) {} renderAll(); }
 function renderAll() { buildLists(); renderDash(); renderInv(); renderHistory(); updateBadges(); }
 
-// ── LISTS ──
+// LISTS, BADGES, SEARCH (変更なし)
 function buildLists() {
   const cos  = [...new Set([...COMPANIES, ...data.inventory.map(i=>i.company).filter(Boolean)])].sort();
   const mats = [...new Set(data.inventory.map(i=>i.material).filter(Boolean))].sort();
@@ -1082,7 +982,6 @@ function buildLists() {
 }
 function setSelect(id, html) { const el = document.getElementById(id), v = el.value; el.innerHTML = html; el.value = v; }
 
-// ── BADGES ──
 function updateBadges() {
   const n = data.inventory.filter(i => i.minQty > 0 && i.qty <= i.minQty).length;
   const show = n > 0;
@@ -1094,7 +993,6 @@ function updateBadges() {
   mb.style.display = show ? '' : 'none'; mb.textContent = n;
 }
 
-// ── SEARCH / FILTER ──
 function getFiltered() {
   const q   = (document.getElementById('searchBox').value||'').toLowerCase();
   const co  = document.getElementById('fCo').value;
@@ -1111,7 +1009,6 @@ function getFiltered() {
 }
 function applyFilters() { renderInv(); }
 
-// ── DASHBOARD ──
 function renderDash() {
   const inv = data.inventory;
   const alerts = inv.filter(i => i.minQty > 0 && i.qty <= i.minQty);
@@ -1141,7 +1038,6 @@ function renderDash() {
       }).join('') + '</div>';
 }
 
-// ── INVENTORY ──
 function sortBy(col) {
   sortDir = sortCol === col ? -sortDir : 1;
   sortCol = col;
@@ -1192,7 +1088,6 @@ function renderInv() {
 
 function toggleAlertOnly() { alertOnly = !alertOnly; applyFilters(); }
 
-// ── DETAIL ──
 function openDetail(id, evt) {
   if (evt) evt.stopPropagation();
   const i = data.inventory.find(x => x.id === id);
@@ -1200,7 +1095,6 @@ function openDetail(id, evt) {
   const w = i.minQty > 0 && i.qty <= i.minQty;
   document.getElementById('dd-title').textContent = i.partNumber || i.name || '詳細';
 
-  // PDFボタン（Drive）
   let pdfBtn = '';
   if (i.driveFileId) {
     pdfBtn = `<a href="${esc(i.driveWebViewLink||'#')}" target="_blank" class="btn btn-ghost" style="width:100%;margin-bottom:10px;display:flex;justify-content:center;">📄 図面PDFを開く（Google Drive）</a>`;
@@ -1231,7 +1125,6 @@ function df(label, val, cls='') {
   return `<div class="df"><div class="dl">${label}</div><div class="dv ${cls}">${esc(String(val))}</div></div>`;
 }
 
-// ── STOCK MODAL ──
 function openStock(id, sign, evt) {
   if (evt) evt.stopPropagation();
   stockTarget = data.inventory.find(i => i.id === id);
@@ -1272,7 +1165,6 @@ function confirmStock() {
   showToast((stockSign>0?'📥 入庫':'📤 出庫') + ' ' + q + '個 完了');
 }
 
-// ── ADD / EDIT FORM ──
 function resetForm() {
   editId = null; pendingPdf = null; removePdfFlag = false;
   document.getElementById('formTitle').textContent = '📋 新規在庫登録';
@@ -1287,8 +1179,7 @@ function resetForm() {
 function editItem(id) {
   const i = data.inventory.find(x=>x.id===id);
   if (!i) return;
-  editId = id;
-  removePdfFlag = false;
+  editId = id; removePdfFlag = false;
   switchPage('add');
   document.getElementById('formTitle').textContent='✏️ 在庫編集';
   document.getElementById('submitBtn').textContent='💾 更新する';
@@ -1298,7 +1189,6 @@ function editItem(id) {
   s('f-material',i.material); s('f-price',i.price||''); s('f-qty',i.qty);
   s('f-minqty',i.minQty); s('f-location',i.location); s('f-note',i.note);
 
-  // 既存PDFのリンク表示
   if (i.driveFileId) {
     document.getElementById('pdfLabel').textContent='📄 新しいPDFを選択すると上書きされます';
     document.getElementById('pdfDrop').classList.add('has');
@@ -1338,18 +1228,13 @@ async function submitForm() {
       const i = data.inventory.find(x=>x.id===editId);
       if (!i) return;
 
-      // PDF処理
       if (pendingPdf) {
-        // 新しいPDFをアップロード（既存があれば上書き）
         const fname = `${partno||name}_${Date.now()}.pdf`;
         if (i.driveFileId) {
-          // 既存ファイルを更新
           try {
             const res = await updatePdfInDrive(i.driveFileId, pendingPdf);
-            driveFileId = i.driveFileId;
-            driveWebViewLink = res.webViewLink || i.driveWebViewLink;
+            driveFileId = i.driveFileId; driveWebViewLink = res.webViewLink || i.driveWebViewLink;
           } catch {
-            // 失敗したら新規アップロード
             const res = await uploadPdfToDrive(pendingPdf, fname);
             driveFileId = res.id; driveWebViewLink = res.webViewLink;
           }
@@ -1358,7 +1243,6 @@ async function submitForm() {
           driveFileId = res.id; driveWebViewLink = res.webViewLink;
         }
       } else if (removePdfFlag) {
-        // PDFを削除
         if (i.driveFileId) deleteDriveFile(i.driveFileId);
         driveFileId = null; driveWebViewLink = null;
       } else {
@@ -1368,7 +1252,6 @@ async function submitForm() {
       Object.assign(i, { tag, company, internalNo:v('f-internalNo'), seiban:v('f-seiban'), partNumber:partno, name, material:v('f-material'), price:parseFloat(v('f-price'))||0, qty:parseInt(v('f-qty'))||0, minQty:parseInt(v('f-minqty'))||0, location:v('f-location'), note:v('f-note'), driveFileId, driveWebViewLink });
       addLog(i,'編集',0); save(); showToast('💾 更新: '+(name||partno));
     } else {
-      // 新規登録
       if (pendingPdf) {
         const fname = `${partno||name}_${Date.now()}.pdf`;
         const res = await uploadPdfToDrive(pendingPdf, fname);
@@ -1395,14 +1278,12 @@ function deleteItem(id) {
   const i=data.inventory.find(x=>x.id===id);
   if (i) {
     addLog(i,'削除',0);
-    // DriveのPDFも削除
     if (i.driveFileId) deleteDriveFile(i.driveFileId);
   }
   data.inventory=data.inventory.filter(x=>x.id!==id);
   save(); showToast('🗑 削除しました');
 }
 
-// ── HISTORY ──
 function renderHistory() {
   const op=document.getElementById('histOp').value;
   const co=document.getElementById('histCo').value;
@@ -1421,7 +1302,6 @@ function renderHistory() {
 }
 function clearHistory() { if(!confirm('履歴をすべて削除しますか？'))return; data.logs=[]; save(); showToast('🗑 履歴削除'); }
 
-// ── LOG ──
 function addLog(item, op, changeQty) {
   const now=new Date();
   const d=`${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
@@ -1429,17 +1309,27 @@ function addLog(item, op, changeQty) {
   if(data.logs.length>3000) data.logs.pop();
 }
 
-// ── EXPORT / IMPORT ──
+// ── ローカルバックアップ機能（既存の機能を明示） ──
 function exportData() {
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=`inventory_${new Date().toISOString().slice(0,10)}.json`; a.click();
-  showToast('💾 バックアップ保存完了');
+  showToast('💾 ローカルバックアップを保存しました');
 }
 function importData(e) {
   const file=e.target.files[0]; if(!file)return;
   const r=new FileReader();
-  r.onload=ev=>{ try { const d=JSON.parse(ev.target.result); if(!d.inventory)throw 0; data=d; save(); showToast('📂 復元完了: '+d.inventory.length+'件'); } catch{ showToast('⚠ 読み込み失敗'); } };
+  r.onload=ev=>{ 
+    try { 
+      const d=JSON.parse(ev.target.result); 
+      if(!d.inventory) throw 0; 
+      data=d; 
+      save(); // 復元後、Driveにも上書き同期させる
+      showToast('📂 復元完了: '+d.inventory.length+'件'); 
+    } catch { 
+      showToast('⚠ 読み込み失敗'); 
+    } 
+  };
   r.readAsText(file); e.target.value='';
 }
 function exportCSV() {
@@ -1453,7 +1343,6 @@ function exportCSV() {
   showToast('📊 CSV出力完了');
 }
 
-// ── NAVIGATION ──
 const PAGES=['dash','inv','add','hist'];
 function switchPage(p) {
   PAGES.forEach(x=>{
@@ -1471,29 +1360,24 @@ function toggleSidebar() {
   bd.classList.toggle('show', sb.classList.contains('open'));
 }
 
-// ── MODAL ──
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
 
-// ── TOAST ──
 let toastTimer;
-function showToast(msg) {
+function showToast(msg, duration = 2400) {
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'), 2400);
+  toastTimer=setTimeout(()=>t.classList.remove('show'), duration);
 }
 
-// ── UTILS ──
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
-// ── KEYBOARD ──
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape') document.querySelectorAll('.overlay.open').forEach(el=>el.classList.remove('open'));
 });
 
-// ── PDF DRAG & DROP ──
 const pdrop=document.getElementById('pdfDrop');
 pdrop.addEventListener('dragover',e=>{e.preventDefault();pdrop.style.borderColor='var(--c-accent)';});
 pdrop.addEventListener('dragleave',()=>pdrop.style.borderColor='');
