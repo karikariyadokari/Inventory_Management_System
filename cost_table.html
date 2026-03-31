@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>東武 商品原価管理システム</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --c-bg:        #f0f2f5;
+  --c-surface:   #ffffff;
+  --c-surface2:  #f7f8fa;
+  --c-border:    #e2e5ea;
+  --c-border2:   #cbd0d8;
+  --c-text:      #1a1d23;
+  --c-text2:     #5a6070;
+  --c-text3:     #9099a8;
+  --c-accent:    #1a56db;
+  --c-accent-h:  #1446bb;
+  --c-accent-bg: #eef3fd;
+  --c-green:     #0e7c3a;
+  --c-green-bg:  #e6f6ec;
+  --c-red:       #c0392b;
+  --c-red-bg:    #fdf0ee;
+  --c-yellow:    #a16207;
+  --c-yellow-bg: #fef9eb;
+  --c-steel:     #2c3e50;
+  --shadow-sm:   0 1px 3px rgba(0,0,0,.08);
+  --shadow-md:   0 4px 16px rgba(0,0,0,.10);
+  --shadow-lg:   0 12px 40px rgba(0,0,0,.14);
+  --r:           6px;
+  --r-lg:        10px;
+  --font:        'Noto Sans JP', sans-serif;
+  --mono:        'IBM Plex Mono', monospace;
+  --sidebar-w:   240px;
+  --header-h:    56px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: var(--font); background: var(--c-bg); color: var(--c-text); font-size: 13px; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+button { font-family: var(--font); cursor: pointer; }
+input, select, textarea { font-family: var(--font); }
+
+#shell { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* ── トップバー ── */
+#topbar { height: var(--header-h); background: var(--c-steel); display: flex; align-items: center; padding: 0 16px; gap: 12px; flex-shrink: 0; position: relative; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+.logo { display: flex; align-items: center; gap: 10px; color: #fff; flex-shrink: 0; }
+.logo-icon { font-size: 22px; }
+.logo-text { font-size: 15px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; }
+.logo-text span { color: #7dd3fc; }
+.tb-sep { width: 1px; height: 28px; background: rgba(255,255,255,.15); flex-shrink: 0; }
+.tb-search { flex: 1; max-width: 380px; position: relative; }
+.tb-search input { width: 100%; background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.15); border-radius: 6px; color: #fff; padding: 7px 10px 7px 32px; font-size: 13px; outline: none; transition: background .15s, border-color .15s; }
+.tb-search input::placeholder { color: rgba(255,255,255,.45); }
+.tb-search input:focus { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.35); }
+.tb-search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,.5); font-size: 14px; pointer-events: none; }
+.tb-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.tb-btn { background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.18); color: rgba(255,255,255,.85); padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 5px; transition: all .15s; white-space: nowrap; }
+.tb-btn:hover { background: rgba(255,255,255,.20); color: #fff; }
+.tb-btn:disabled { opacity: .45; cursor: not-allowed; }
+.tb-btn.is-syncing { animation: tbPulse .9s ease-in-out infinite; }
+@keyframes tbPulse { 0%,100%{opacity:.65} 50%{opacity:1} }
+.tb-home { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.15); color: rgba(255,255,255,.7); padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 5px; transition: all .15s; white-space: nowrap; text-decoration: none; }
+.tb-home:hover { background: rgba(255,255,255,.16); color: #fff; border-color: rgba(255,255,255,.25); }
+#hamburger { display: none; background: none; border: none; color: #fff; font-size: 22px; padding: 4px; cursor: pointer; }
+
+/* ── レイアウト ── */
+#body { flex: 1; display: flex; overflow: hidden; }
+#sidebar { width: var(--sidebar-w); background: var(--c-surface); border-right: 1px solid var(--c-border); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; transition: transform .25s ease; }
+.sb-section { padding: 14px 10px 6px; }
+.sb-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--c-text3); padding: 0 6px; margin-bottom: 6px; }
+.nav-item { display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: var(--r); color: var(--c-text2); font-size: 13px; font-weight: 500; cursor: pointer; transition: all .12s; }
+.nav-item:hover { background: var(--c-bg); color: var(--c-text); }
+.nav-item.active { background: var(--c-accent-bg); color: var(--c-accent); font-weight: 600; }
+.nav-item .ni { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+.sb-divider { height: 1px; background: var(--c-border); margin: 6px 10px; }
+.sb-filter { padding: 0 10px 12px; }
+.sb-filter-title { font-size: 10px; font-weight: 700; color: var(--c-text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 5px; margin-top: 10px; }
+.sb-select { width: 100%; background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--r); color: var(--c-text); padding: 8px 28px 8px 10px; font-size: 12px; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239099a8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; }
+.sb-select:focus { border-color: var(--c-accent); }
+
+/* Drive同期ステータス */
+.drive-status { margin: 6px 10px 10px; padding: 8px 10px; border-radius: var(--r); font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.drive-status.ok      { background: var(--c-green-bg);  color: var(--c-green); }
+.drive-status.warn    { background: var(--c-yellow-bg); color: var(--c-yellow); }
+.drive-status.err     { background: var(--c-red-bg);    color: var(--c-red); }
+.drive-status.syncing { background: var(--c-accent-bg); color: var(--c-accent); }
+.ds-spin { display: inline-block; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── コンテンツ / ページ ── */
+#content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.page { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+.page.active { display: flex; }
+
+/* ── ダッシュボード ── */
+#page-dash { overflow-y: auto; }
+.dash-inner { padding: 20px; display: flex; flex-direction: column; gap: 18px; max-width: 1400px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.kpi-card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-lg); padding: 16px 18px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 5px; }
+.kpi-icon { font-size: 20px; }
+.kpi-val { font-size: 32px; font-weight: 900; font-family: var(--mono); line-height: 1.1; }
+.kpi-lbl { font-size: 12px; color: var(--c-text2); font-weight: 500; }
+.kpi-card.blue   .kpi-val { color: var(--c-accent); }
+.kpi-card.red    .kpi-val { color: var(--c-red); }
+.kpi-card.green  .kpi-val { color: var(--c-green); }
+.kpi-card.yellow .kpi-val { color: var(--c-yellow); }
+.dash-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+.card-hd { padding: 12px 16px; border-bottom: 1px solid var(--c-border); font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.card-body { overflow: auto; max-height: 300px; }
+.mini-tbl { width: 100%; border-collapse: collapse; }
+.mini-tbl th, .mini-tbl td { padding: 8px 12px; text-align: left; font-size: 12px; }
+.mini-tbl th { background: var(--c-surface2); color: var(--c-text3); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--c-border); }
+.mini-tbl td { border-bottom: 1px solid var(--c-border); }
+.mini-tbl tr:last-child td { border-bottom: none; }
+.mini-tbl tbody tr:hover td { background: var(--c-bg); cursor: pointer; }
+.tl-item { display: flex; align-items: flex-start; padding: 9px 14px; gap: 10px; border-bottom: 1px solid var(--c-border); transition: background .1s; }
+.tl-item:last-child { border-bottom: none; }
+.tl-item:hover { background: var(--c-bg); }
+.tl-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; margin-top: 2px; }
+.tl-dot.new  { background: var(--c-accent-bg); }
+.tl-dot.edit { background: var(--c-yellow-bg); }
+.tl-dot.del  { background: var(--c-surface2); }
+.tl-info { flex: 1; min-width: 0; }
+.tl-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-meta { font-size: 11px; color: var(--c-text3); margin-top: 1px; }
+.tl-right { text-align: right; flex-shrink: 0; }
+.tl-op   { font-size: 12px; font-weight: 700; color: var(--c-text2); }
+.tl-time { font-size: 10px; color: var(--c-text3); margin-top: 2px; }
+
+/* ── 一覧 ── */
+.inv-bar { padding: 10px 14px; background: var(--c-surface); border-bottom: 1px solid var(--c-border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+.count-chip { background: var(--c-accent-bg); color: var(--c-accent); font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 12px; }
+.bar-right { margin-left: auto; display: flex; gap: 7px; }
+.btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 13px; border-radius: var(--r); font-size: 13px; font-weight: 600; border: 1px solid transparent; cursor: pointer; transition: all .12s; white-space: nowrap; }
+.btn-primary { background: var(--c-accent); color: #fff; border-color: var(--c-accent); }
+.btn-primary:hover { background: var(--c-accent-h); }
+.btn-ghost { background: var(--c-surface); color: var(--c-text2); border-color: var(--c-border); }
+.btn-ghost:hover { background: var(--c-bg); color: var(--c-text); }
+.btn-danger { background: var(--c-red-bg); color: var(--c-red); border-color: #f5c6c2; }
+.btn-danger:hover { background: #faddda; }
+.btn-green { background: var(--c-green-bg); color: var(--c-green); border-color: #b7e5c8; }
+.btn-green:hover { background: #d0f0de; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+
+.tbl-wrap { flex: 1; overflow: auto; }
+
+/* ── 原価テーブル ── */
+table.ctbl { width: 100%; border-collapse: collapse; min-width: 1400px; }
+table.ctbl thead th { background: var(--c-steel); color: rgba(255,255,255,.82); padding: 8px 9px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; position: sticky; top: 0; z-index: 5; border-right: 1px solid rgba(255,255,255,.08); cursor: pointer; user-select: none; transition: background .12s; text-align: center; }
+table.ctbl thead th:last-child { border-right: none; cursor: default; }
+table.ctbl thead th:hover:not(:last-child) { background: #3d5166; }
+table.ctbl thead th.sorted { background: #1a3c57; }
+.sort-arrow { color: rgba(255,255,255,.35); margin-left: 3px; font-size: 10px; }
+table.ctbl thead th.sorted .sort-arrow { color: #7dd3fc; }
+table.ctbl thead tr.group-row th { background: #1e2f3e; color: rgba(255,255,255,.55); font-size: 9.5px; padding: 4px 9px; letter-spacing: .08em; cursor: default; border-bottom: 1px solid rgba(255,255,255,.08); }
+table.ctbl thead tr.group-row th:hover { background: #1e2f3e; }
+table.ctbl tbody tr { border-bottom: 1px solid var(--c-border); transition: background .1s; }
+table.ctbl tbody tr:hover { background: #f2f6ff; }
+/* 楽観的UI: 未同期行 */
+table.ctbl tbody tr.optimistic { position: relative; }
+table.ctbl tbody tr.optimistic td:first-child { padding-left: 22px; }
+table.ctbl tbody tr.optimistic td:first-child::before { content: '⏳'; font-size: 10px; position: absolute; left: 6px; top: 50%; transform: translateY(-50%); opacity: .5; }
+table.ctbl tbody td { padding: 8px 9px; vertical-align: middle; font-size: 12px; border-right: 1px solid var(--c-border); }
+table.ctbl tbody td:last-child { border-right: none; }
+
+table.ctbl td.grp-l1  { background-color: rgba(26,86,219,.03); }
+table.ctbl tr:hover td.grp-l1  { background-color: rgba(26,86,219,.07); }
+table.ctbl td.grp-m   { background-color: rgba(14,124,58,.03); }
+table.ctbl tr:hover td.grp-m   { background-color: rgba(14,124,58,.07); }
+table.ctbl td.grp-hq  { background-color: rgba(161,98,7,.03); }
+table.ctbl tr:hover td.grp-hq  { background-color: rgba(161,98,7,.07); }
+table.ctbl td.grp-g   { background-color: rgba(192,57,43,.03); }
+table.ctbl tr:hover td.grp-g   { background-color: rgba(192,57,43,.07); }
+table.ctbl td.grp-l2  { background-color: rgba(26,86,219,.05); }
+table.ctbl tr:hover td.grp-l2  { background-color: rgba(26,86,219,.09); }
+table.ctbl td.grp-m2  { background-color: rgba(14,124,58,.05); }
+table.ctbl tr:hover td.grp-m2  { background-color: rgba(14,124,58,.09); }
+
+.c-pn    { font-family: var(--mono); font-weight: 600; color: var(--c-accent); font-size: 11.5px; white-space: nowrap; }
+.c-co    { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.c-name  { font-weight: 500; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.c-mat   { display: inline-block; background: #eef2fb; color: #3b5bdb; font-family: var(--mono); font-size: 10.5px; font-weight: 600; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+.c-num   { font-family: var(--mono); font-size: 12px; text-align: right; white-space: nowrap; }
+.c-money { font-family: var(--mono); font-size: 12px; text-align: right; white-space: nowrap; color: var(--c-text2); }
+.c-total { font-family: var(--mono); font-size: 13px; font-weight: 700; text-align: right; white-space: nowrap; color: var(--c-accent); }
+.c-act   { display: flex; gap: 4px; align-items: center; white-space: nowrap; }
+
+/* ── フォーム ── */
+#page-add { overflow-y: auto; }
+.form-wrap { max-width: 960px; margin: 22px auto; padding: 0 20px 60px; }
+.form-title { font-size: 17px; font-weight: 800; margin-bottom: 14px; color: var(--c-steel); }
+.form-card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 14px; }
+.form-card-hd { padding: 12px 18px; background: var(--c-surface2); border-bottom: 1px solid var(--c-border); font-size: 11px; font-weight: 700; color: var(--c-text2); text-transform: uppercase; letter-spacing: .07em; }
+.form-row { display: grid; gap: 0; border-bottom: 1px solid var(--c-border); }
+.form-row:last-child { border-bottom: none; }
+.form-row.c2 { grid-template-columns: 1fr 1fr; }
+.form-row.c3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-row.c4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.form-row.c5 { grid-template-columns: 1fr 1fr 1fr 1fr 1fr; }
+.form-field { padding: 13px 16px; border-right: 1px solid var(--c-border); display: flex; flex-direction: column; gap: 6px; }
+.form-field:last-child { border-right: none; }
+.form-label { font-size: 11px; font-weight: 700; color: var(--c-text2); }
+.form-sublabel { font-size: 10px; color: var(--c-text3); }
+.req { color: var(--c-red); margin-left: 2px; }
+.form-input { background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--r); color: var(--c-text); font-size: 14px; padding: 9px 11px; outline: none; transition: border-color .15s, box-shadow .15s; width: 100%; -webkit-appearance: none; }
+.form-input:focus { border-color: var(--c-accent); box-shadow: 0 0 0 3px rgba(26,86,219,.10); }
+.form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+.form-actions .btn { padding: 10px 22px; font-size: 14px; }
+.cost-preview { background: var(--c-accent-bg); border: 1px solid #c5d7f8; border-radius: var(--r); padding: 12px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.cp-item { display: flex; flex-direction: column; gap: 2px; }
+.cp-lbl { font-size: 10px; color: var(--c-accent); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.cp-val { font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--c-accent); }
+.cp-sep { width: 1px; height: 30px; background: rgba(26,86,219,.2); flex-shrink: 0; }
+
+/* ── 履歴 ── */
+.hist-bar { padding: 10px 14px; background: var(--c-surface); border-bottom: 1px solid var(--c-border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+.hist-sel { background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--r); color: var(--c-text); padding: 7px 28px 7px 10px; font-size: 12px; outline: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239099a8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; }
+.hist-cnt { font-size: 12px; color: var(--c-text3); }
+.hist-list { flex: 1; overflow-y: auto; }
+
+/* ── モーダル ── */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; backdrop-filter: blur(2px); align-items: center; justify-content: center; padding: 20px; }
+.overlay.open { display: flex; }
+.modal { background: var(--c-surface); border-radius: var(--r-lg); border: 1px solid var(--c-border); box-shadow: var(--shadow-lg); width: 100%; max-width: 560px; animation: popIn .18s ease; overflow: hidden; }
+.modal.modal-wide { max-width: 680px; }
+@keyframes popIn { from { transform: scale(.93); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-hd { padding: 15px 18px; border-bottom: 1px solid var(--c-border); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 16px; font-weight: 700; }
+.modal-close { width: 28px; height: 28px; background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: 50%; color: var(--c-text2); font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.modal-close:hover { background: var(--c-bg); }
+.modal-body { padding: 18px; max-height: 68vh; overflow-y: auto; }
+.modal-footer { padding: 12px 18px; border-top: 1px solid var(--c-border); display: flex; gap: 8px; justify-content: flex-end; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--c-border); border-radius: var(--r); overflow: hidden; margin-bottom: 14px; }
+.df { padding: 9px 12px; border-bottom: 1px solid var(--c-border); border-right: 1px solid var(--c-border); }
+.df.full { grid-column: 1 / -1; border-right: none; }
+.df:nth-child(even):not(.full) { border-right: none; }
+.df:nth-last-child(-n+2):not(.full) { border-bottom: none; }
+.df:last-child.full { border-bottom: none; }
+.dl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--c-text3); margin-bottom: 3px; }
+.dv { font-size: 13px; font-weight: 600; }
+.dv.mono { font-family: var(--mono); color: var(--c-accent); }
+.dv.big  { font-size: 22px; font-weight: 900; font-family: var(--mono); color: var(--c-accent); }
+.detail-section { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--c-text3); margin: 14px 0 6px; }
+.detail-section:first-child { margin-top: 0; }
+
+/* 衝突モーダル */
+.conflict-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.cf-col { border: 1px solid var(--c-border); border-radius: var(--r); overflow: hidden; }
+.cf-col-hd { padding: 9px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
+.cf-col-hd.local  { background: var(--c-yellow-bg); color: var(--c-yellow); }
+.cf-col-hd.server { background: var(--c-accent-bg); color: var(--c-accent); }
+.cf-col-body { padding: 10px 12px; }
+.cf-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--c-border); font-size: 12px; }
+.cf-row:last-child { border-bottom: none; }
+.cf-key { color: var(--c-text3); }
+.cf-val { font-family: var(--mono); font-weight: 600; }
+
+/* ── toast / backdrop / empty ── */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--c-steel); color: #fff; padding: 10px 20px; border-radius: 24px; font-size: 13px; font-weight: 600; opacity: 0; transition: all .25s; pointer-events: none; z-index: 900; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#sb-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 99; }
+.empty { text-align: center; padding: 48px 20px; color: var(--c-text3); }
+.ei { font-size: 36px; margin-bottom: 10px; }
+.empty p { font-size: 14px; }
+
+/* ── モバイル ── */
+#mnav { display: none; }
+@media (max-width: 768px) {
+  #sidebar { position: fixed; left: 0; top: var(--header-h); bottom: 0; z-index: 100; transform: translateX(-100%); width: 240px; }
+  #sidebar.open { transform: translateX(0); }
+  #sb-backdrop.show { display: block; }
+  #hamburger { display: flex; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .dash-cols { grid-template-columns: 1fr; }
+  .form-row.c4,.form-row.c5 { grid-template-columns: 1fr 1fr; }
+  .form-row.c3 { grid-template-columns: 1fr 1fr; }
+  #mnav { display: flex; background: var(--c-surface); border-top: 1px solid var(--c-border); position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; box-shadow: 0 -2px 10px rgba(0,0,0,.08); }
+  .mn-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 4px; font-size: 10px; color: var(--c-text3); cursor: pointer; transition: color .12s; }
+  .mn-item.active { color: var(--c-accent); }
+  .mni { font-size: 18px; margin-bottom: 2px; }
+  #content { padding-bottom: 60px; }
+  .conflict-cols { grid-template-columns: 1fr; }
+  .tb-lbl { display: none; }
+}
+</style>
+</head>
+<body>
+<div id="shell">
+
+<!-- ═══════════════════════════════════════ トップバー -->
+<div id="topbar">
+  <button id="hamburger" onclick="toggleSidebar()">☰</button>
+  <div class="logo">
+    <span class="logo-icon">💴</span>
+    <span class="logo-text">東武<span> 商品原価管理</span></span>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-search">
+    <span class="tb-search-icon">🔍</span>
+    <input type="text" placeholder="会社名・図面番号・商品名・材質を検索..." id="searchBox" oninput="applyFilters()">
+  </div>
+  <div class="tb-right">
+    <button class="tb-btn" id="syncNowBtn" onclick="manualSync()" title="今すぐDriveへ同期">
+      <span id="syncNowIcon">☁️</span><span class="tb-lbl"> 今すぐ同期</span>
+    </button>
+    <button class="tb-btn" onclick="manualLoad()" title="Driveから最新データを読み込む">
+      🔄<span class="tb-lbl"> 最新読込</span>
+    </button>
+    <button class="tb-btn" onclick="exportData()" title="JSONバックアップ">
+      💾<span class="tb-lbl"> バックアップ</span>
+    </button>
+    <label class="tb-btn" style="cursor:pointer;" title="JSONから復元">
+      📂<span class="tb-lbl"> 復元</span>
+      <input type="file" accept="application/json" style="display:none" onchange="importData(event)">
+    </label>
+    <div class="tb-sep"></div>
+    <a class="tb-home" href="https://karikariyadokari.github.io/Inventory_Management_System/index.html" title="ポータルトップへ戻る">🏠<span class="tb-lbl"> トップ</span></a>
+  </div>
+</div>
+
+<div id="body">
+<!-- ═══════════════════════════════════════ サイドバー -->
+<div id="sidebar">
+  <div class="sb-section">
+    <div class="sb-label">メニュー</div>
+    <div class="nav-item active" id="nav-dash" onclick="switchPage('dash')"><span class="ni">📊</span>ダッシュボード</div>
+    <div class="nav-item" id="nav-list" onclick="switchPage('list')"><span class="ni">💴</span>原価一覧</div>
+    <div class="nav-item" id="nav-add"  onclick="switchPage('add')"><span class="ni">➕</span>新規登録</div>
+    <div class="nav-item" id="nav-hist" onclick="switchPage('hist')"><span class="ni">🕒</span>変更履歴</div>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="drive-status warn" id="driveStatus">
+    <span id="dsIcon">☁️</span><span id="dsText">未接続</span>
+  </div>
+  <div class="sb-section">
+    <div class="sb-label">絞り込み</div>
+    <div class="sb-filter">
+      <div class="sb-filter-title" style="margin-top:0">会社名</div>
+      <select class="sb-select" id="fCo"  onchange="applyFilters()"><option value="">すべて</option></select>
+      <div class="sb-filter-title">材質</div>
+      <select class="sb-select" id="fMat" onchange="applyFilters()"><option value="">すべて</option></select>
+    </div>
+  </div>
+  <div style="margin-top:auto;padding:10px 10px 14px;">
+    <a href="index.html" style="display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:6px;color:var(--c-text3);font-size:12px;font-weight:600;text-decoration:none;border:1px solid var(--c-border);background:var(--c-surface2);transition:all .12px;" onmouseover="this.style.color='var(--c-text)';this.style.borderColor='var(--c-border2)'" onmouseout="this.style.color='var(--c-text3)';this.style.borderColor='var(--c-border)'">
+      <span style="font-size:14px">🏠</span> ポータルへ戻る
+    </a>
+  </div>
+</div>
+<div id="sb-backdrop" onclick="toggleSidebar()"></div>
+
+<div id="content">
+
+<!-- ═══════════════════════════════════════ ダッシュボード -->
+<div class="page active" id="page-dash">
+  <div class="dash-inner">
+    <div class="kpi-grid">
+      <div class="kpi-card blue">  <div class="kpi-icon">📋</div><div class="kpi-val" id="kpi-total">0</div><div class="kpi-lbl">登録品目数</div></div>
+      <div class="kpi-card green"> <div class="kpi-icon">🏢</div><div class="kpi-val" id="kpi-co">0</div>   <div class="kpi-lbl">取引先数</div></div>
+      <div class="kpi-card yellow"><div class="kpi-icon">💎</div><div class="kpi-val" id="kpi-mat">0</div>  <div class="kpi-lbl">材質種類</div></div>
+      <div class="kpi-card red">   <div class="kpi-icon">💴</div><div class="kpi-val" id="kpi-avg">¥0</div><div class="kpi-lbl">平均原価</div></div>
+    </div>
+    <div class="dash-cols">
+      <div class="card"><div class="card-hd">💴 原価上位アイテム</div><div class="card-body" id="topCostTable"></div></div>
+      <div class="card"><div class="card-hd">🕒 最近の変更</div>    <div class="card-body" id="recentLog"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ 原価一覧 -->
+<div class="page" id="page-list">
+  <div class="inv-bar">
+    <span class="count-chip" id="listCount">0件</span>
+    <div class="bar-right">
+      <button class="btn btn-primary btn-sm" onclick="switchPage('add')">＋ 新規登録</button>
+      <button class="btn btn-ghost   btn-sm" onclick="exportCSV()">📊 CSV出力</button>
+    </div>
+  </div>
+  <div class="tbl-wrap">
+    <table class="ctbl">
+      <thead>
+        <tr class="group-row">
+          <th colspan="4">基本情報</th>
+          <th colspan="2" style="background:#1a2e40;border-left:2px solid rgba(255,255,255,.12)">L1 加工</th>
+          <th colspan="2" style="background:#1c3a28;border-left:2px solid rgba(255,255,255,.12)">M 材料</th>
+          <th colspan="2" style="background:#3d2c0a;border-left:2px solid rgba(255,255,255,.12)">外注</th>
+          <th colspan="2" style="background:#1a2e40;border-left:2px solid rgba(255,255,255,.12)">L2 加工</th>
+          <th colspan="2" style="background:#1c3a28;border-left:2px solid rgba(255,255,255,.12)">M2 材料</th>
+          <th colspan="2">合計・操作</th>
+        </tr>
+        <tr>
+          <th onclick="sortBy('company')"   id="th-company">会社名<span class="sort-arrow">⇅</span></th>
+          <th onclick="sortBy('drawingNo')" id="th-drawingNo">図面番号<span class="sort-arrow">⇅</span></th>
+          <th onclick="sortBy('name')"      id="th-name">商品名<span class="sort-arrow">⇅</span></th>
+          <th onclick="sortBy('material')"  id="th-material">材質<span class="sort-arrow">⇅</span></th>
+          <th onclick="sortBy('s')"         id="th-s"       style="border-left:2px solid rgba(255,255,255,.12)">S<span class="sort-arrow">⇅</span></th>
+          <th onclick="sortBy('l1')"        id="th-l1">L1(H)<span class="sort-arrow">⇅</span></th>
+          <th onclick="sortBy('m')"         id="th-m"       style="border-left:2px solid rgba(255,255,255,.12)">M(H)<span class="sort-arrow">⇅</span></th>
+          <th onclick="sortBy('mCost')"     id="th-mCost">M原価<span class="sort-arrow">⇅</span></th>
+          <th onclick="sortBy('hq')"        id="th-hq"      style="border-left:2px solid rgba(255,255,255,.12)">HQ(円)<span class="sort-arrow">⇅</span></th>
+          <th onclick="sortBy('g')"         id="th-g">G(円)<span class="sort-arrow">⇅</span></th>
+          <th onclick="sortBy('l2')"        id="th-l2"      style="border-left:2px solid rgba(255,255,255,.12)">L2(H)<span class="sort-arrow">⇅</span></th>
+          <th onclick="sortBy('l2Cost')"    id="th-l2Cost">L2原価<span class="sort-arrow">⇅</span></th>
+          <th onclick="sortBy('m2')"        id="th-m2"      style="border-left:2px solid rgba(255,255,255,.12)">M2(H)<span class="sort-arrow">⇅</span></th>
+          <th onclick="sortBy('m2Cost')"    id="th-m2Cost">M2原価<span class="sort-arrow">⇅</span></th>
+          <th onclick="sortBy('totalCost')" id="th-totalCost">合計原価<span class="sort-arrow">⇅</span></th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="listBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ 登録フォーム -->
+<div class="page" id="page-add">
+  <div class="form-wrap">
+    <div class="form-title" id="formTitle">📋 商品原価 新規登録</div>
+    <div class="form-card">
+      <div class="form-card-hd">🏢 基本情報</div>
+      <div class="form-row c4">
+        <div class="form-field"><label class="form-label">会社名<span class="req">*</span></label><input type="text" class="form-input" id="f-company" list="dl-co" placeholder="例: オリエント工機(株)"><datalist id="dl-co"></datalist></div>
+        <div class="form-field"><label class="form-label">図面番号<span class="req">*</span></label><input type="text" class="form-input" id="f-drawingNo" placeholder="例: OW-12345"></div>
+        <div class="form-field"><label class="form-label">商品名<span class="req">*</span></label><input type="text" class="form-input" id="f-name" placeholder="例: シャフト"></div>
+        <div class="form-field"><label class="form-label">材質</label><input type="text" class="form-input" id="f-material" list="dl-mat" placeholder="例: SCM415"><datalist id="dl-mat"></datalist></div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-hd">⚙️ L1 加工 / M 材料</div>
+      <div class="form-row c5">
+        <div class="form-field"><label class="form-label">S</label><span class="form-sublabel">数量・サイズ係数</span><input type="number" class="form-input" id="f-s" placeholder="0" min="0" step="any" oninput="updatePreview()"></div>
+        <div class="form-field"><label class="form-label">L1 <small style="color:var(--c-text3)">(H)</small></label><span class="form-sublabel">加工時間</span><input type="number" class="form-input" id="f-l1" placeholder="0.00" min="0" step="0.01" oninput="updatePreview()"></div>
+        <div class="form-field"><label class="form-label">L1単価 <small style="color:var(--c-text3)">(円/H)</small></label><span class="form-sublabel">時間単価</span><input type="number" class="form-input" id="f-l1rate" placeholder="3000" min="0" oninput="updatePreview()"></div>
+        <div class="form-field"><label class="form-label">M <small style="color:var(--c-text3)">(H)</small></label><span class="form-sublabel">材料時間</span><input type="number" class="form-input" id="f-m" placeholder="0.00" min="0" step="0.01" oninput="updatePreview()"></div>
+        <div class="form-field"><label class="form-label">M単価 <small style="color:var(--c-text3)">(円/H)</small></label><span class="form-sublabel">材料時間単価</span><input type="number" class="form-input" id="f-mrate" placeholder="2000" min="0" oninput="updatePreview()"></div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-hd">🔄 外注費（HQ / G）</div>
+      <div class="form-row c2">
+        <div class="form-field"><label class="form-label">HQ <small style="color:var(--c-text3)">(円)</small></label><span class="form-sublabel">外注費 HQ</span><input type="number" class="form-input" id="f-hq" placeholder="0" min="0" oninput="updatePreview()"></div>
+        <div class="form-field"><label class="form-label">G <small style="color:var(--c-text3)">(円)</small></label><span class="form-sublabel">外注費 G</span><input type="number" class="form-input" id="f-g" placeholder="0" min="0" oninput="updatePreview()"></div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-hd">⚙️ L2 加工 / M2 材料（第2工程）</div>
+      <div class="form-row c4">
+        <div class="form-field"><label class="form-label">L2 <small style="color:var(--c-text3)">(H)</small></label><span class="form-sublabel">第2加工時間</span><input type="number" class="form-input" id="f-l2" placeholder="0.00" min="0" step="0.01" oninput="updatePreview()"></div>
+        <div class="form-field"><label class="form-label">L2単価 <small style="color:var(--c-text3)">(円/H)</small></label><span class="form-sublabel">第2加工時間単価</span><input type="number" class="form-input" id="f-l2rate" placeholder="3000" min="0" oninput="updatePreview()"></div>
+        <div class="form-field"><label class="form-label">M2 <small style="color:var(--c-text3)">(H)</small></label><span class="form-sublabel">第2材料時間</span><input type="number" class="form-input" id="f-m2" placeholder="0.00" min="0" step="0.01" oninput="updatePreview()"></div>
+        <div class="form-field"><label class="form-label">M2単価 <small style="color:var(--c-text3)">(円/H)</small></label><span class="form-sublabel">第2材料時間単価</span><input type="number" class="form-input" id="f-m2rate" placeholder="2000" min="0" oninput="updatePreview()"></div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-hd">💴 原価プレビュー（リアルタイム）</div>
+      <div style="padding:14px 16px">
+        <div class="cost-preview">
+          <div class="cp-item"><div class="cp-lbl">L1原価</div><div class="cp-val" id="prev-l1">¥0</div></div>
+          <div class="cp-sep"></div>
+          <div class="cp-item"><div class="cp-lbl">M原価</div><div class="cp-val" id="prev-m">¥0</div></div>
+          <div class="cp-sep"></div>
+          <div class="cp-item"><div class="cp-lbl">HQ外注</div><div class="cp-val" id="prev-hq">¥0</div></div>
+          <div class="cp-sep"></div>
+          <div class="cp-item"><div class="cp-lbl">G外注</div><div class="cp-val" id="prev-g">¥0</div></div>
+          <div class="cp-sep"></div>
+          <div class="cp-item"><div class="cp-lbl">L2原価</div><div class="cp-val" id="prev-l2">¥0</div></div>
+          <div class="cp-sep"></div>
+          <div class="cp-item"><div class="cp-lbl">M2原価</div><div class="cp-val" id="prev-m2">¥0</div></div>
+          <div class="cp-sep"></div>
+          <div class="cp-item"><div class="cp-lbl" style="color:#c0392b">合計原価</div><div class="cp-val" id="prev-total" style="color:#c0392b;font-size:20px">¥0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost"   onclick="resetForm()">キャンセル</button>
+      <button class="btn btn-primary" id="submitBtn" onclick="submitForm()">✅ 登録する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ 変更履歴 -->
+<div class="page" id="page-hist">
+  <div class="hist-bar">
+    <select class="hist-sel" id="histOp" onchange="renderHistory()">
+      <option value="">すべての操作</option>
+      <option value="新規登録">🆕 新規登録</option>
+      <option value="編集">✏️ 編集</option>
+      <option value="削除">🗑 削除</option>
+    </select>
+    <select class="hist-sel" id="histCo" onchange="renderHistory()"><option value="">すべての会社</option></select>
+    <span class="hist-cnt" id="histCnt"></span>
+    <div style="flex:1"></div>
+    <button class="btn btn-danger btn-sm" onclick="clearHistory()">🗑 全削除</button>
+  </div>
+  <div class="hist-list" id="histList"></div>
+</div>
+
+</div></div>
+
+<!-- ═══════════════════════════════════════ モバイルナビ -->
+<div id="mnav">
+  <div class="mn-item active" id="mn-dash" onclick="switchPage('dash')"><span class="mni">📊</span><span>ダッシュ</span></div>
+  <div class="mn-item" id="mn-list" onclick="switchPage('list')"><span class="mni">💴</span><span>原価</span></div>
+  <div class="mn-item" id="mn-add"  onclick="switchPage('add')"><span class="mni">➕</span><span>登録</span></div>
+  <div class="mn-item" id="mn-hist" onclick="switchPage('hist')"><span class="mni">🕒</span><span>履歴</span></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ 詳細モーダル -->
+<div class="overlay" id="detailModal">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-hd"><div class="modal-title" id="dd-title">詳細</div><button class="modal-close" onclick="closeModal('detailModal')">✕</button></div>
+    <div class="modal-body" id="dd-body"></div>
+    <div class="modal-footer" id="dd-footer"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ 衝突解決モーダル -->
+<div class="overlay" id="conflictModal">
+  <div class="modal modal-wide">
+    <div class="modal-hd">
+      <div class="modal-title">⚠️ データの衝突を検知しました</div>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--c-text2);line-height:1.6;margin-bottom:4px">
+        別のデバイスまたはタブでデータが更新されています。<br>
+        どちらのデータを使用するか選択してください。
+      </p>
+      <div class="conflict-cols" id="conflictCols"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost"   onclick="resolveConflict('server')">☁️ サーバーのデータを使う</button>
+      <button class="btn btn-primary" onclick="resolveConflict('local')">💻 自分の変更で上書きする</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════ JavaScript -->
+<script>
+// ══════════════════════════════════════════════════════════════════════
+// ★ GASでデプロイした「ウェブアプリのURL」を貼り付けてください ★
+// ══════════════════════════════════════════════════════════════════════
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbz6xTAogzq9i_vwtRUUF5Ar2Q2utX0OxYj_buOM8_VRDEbp5sMYSO3tt6tQz76swQS3/exec';
+
+// ══════════════════════════════════════════════════════════════════════
+// 状態変数
+// ══════════════════════════════════════════════════════════════════════
+let data          = JSON.parse(localStorage.getItem('cost_v2') || '{"items":[],"logs":[]}');
+let dataTimestamp = parseInt(localStorage.getItem('cost_v2_ts') || '0', 10);
+let pendingConflict = null;  // 衝突時にサーバーデータを一時保持
+
+let syncTimer   = null;   // 3秒デバウンスタイマー
+let isSyncing   = false;  // 同期中フラグ
+let pendingSync = false;  // 同期待ちフラグ
+
+let editId  = null;
+let sortCol = 'company', sortDir = 1;
+
+// ══════════════════════════════════════════════════════════════════════
+// 起動
+// ══════════════════════════════════════════════════════════════════════
+window.onload = () => {
+  boot();
+  loadFromDrive();
+};
+function boot()      { buildLists(); renderAll(); }
+function renderAll() { buildLists(); renderDash(); renderList(); renderHistory(); }
+
+// ══════════════════════════════════════════════════════════════════════
+// ローカル保存 ＋ 楽観的UI ＋ 同期スケジュール（3秒デバウンス）
+// ══════════════════════════════════════════════════════════════════════
+function save(optimisticId) {
+  // ① localStorageへ即時書き込み
+  persistLocal();
+  // ② UIを即時更新（楽観的UI）
+  renderAll();
+  // ③ 未同期マークを付与
+  if (optimisticId) requestAnimationFrame(() => markOptimistic(optimisticId));
+  // ④ 無操作3秒後にDrive同期をスケジュール
+  setSyncStatus('pending', '3秒後に同期...');
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => syncToDrive(false), 3000);
+}
+
+function persistLocal() {
+  try {
+    localStorage.setItem('cost_v2',    JSON.stringify(data));
+    localStorage.setItem('cost_v2_ts', String(dataTimestamp));
+  } catch(e) {}
+}
+
+// 楽観的UI: 未同期マーク付与 / 解除
+function markOptimistic(id) {
+  const row = document.querySelector(`tr[data-id="${id}"]`);
+  if (row) row.classList.add('optimistic');
+}
+function clearOptimistic() {
+  document.querySelectorAll('tr.optimistic').forEach(r => r.classList.remove('optimistic'));
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// Drive ── 読み込み
+// ══════════════════════════════════════════════════════════════════════
+async function loadFromDrive() {
+  setSyncStatus('syncing', '読込中...');
+  try {
+    const res  = await fetch(GAS_URL + '?action=load');
+    const json = await res.json();
+    if (json.status === 'ok' && json.data && json.data.items) {
+      data          = json.data;
+      dataTimestamp = json.timestamp || 0;
+      persistLocal();
+      renderAll();
+      setSyncStatus('ok', '同期済み');
+      showToast('☁️ 最新データを読み込みました');
+    } else {
+      setSyncStatus('ok', '同期済み（初回）');
+    }
+  } catch(e) {
+    console.error('[Drive load]', e);
+    setSyncStatus('err', '読込エラー');
+    showToast('⚠️ Drive読み込みエラー（オフライン？）');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// Drive ── 保存（衝突検知あり）
+// ══════════════════════════════════════════════════════════════════════
+async function syncToDrive(force) {
+  if (isSyncing) { pendingSync = true; return; }
+  isSyncing = true;
+  setSyncStatus('syncing', '保存中...');
+  setSyncNowBtn(true);
+
+  try {
+    const res    = await fetch(GAS_URL, {
+      method: 'POST',
+      body:   JSON.stringify({ action: 'save', data, timestamp: dataTimestamp, force: !!force })
+    });
+    const result = await res.json();
+
+    if (result.status === 'conflict') {
+      // ── 衝突検知 ──────────────────────────────────────────────────
+      isSyncing = false;
+      setSyncNowBtn(false);
+      setSyncStatus('err', '衝突を検知');
+      showConflictModal(result.data, result.timestamp);
+      return;
+    }
+
+    if (result.status === 'ok') {
+      dataTimestamp = result.timestamp;
+      persistLocal();
+      setSyncStatus('ok', '同期完了');
+      showToast('☁️ Driveに同期しました');
+      clearOptimistic();
+    } else {
+      throw new Error(result.message || '不明なエラー');
+    }
+
+  } catch(err) {
+    console.error('[Drive sync]', err);
+    setSyncStatus('err', '同期エラー');
+    showToast('⚠️ 同期エラー。30秒後にリトライします');
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(() => syncToDrive(false), 30000);
+  } finally {
+    isSyncing = false;
+    setSyncNowBtn(false);
+    if (pendingSync) {
+      pendingSync = false;
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(() => syncToDrive(false), 1000);
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// 手動ボタン
+// ══════════════════════════════════════════════════════════════════════
+async function manualSync() {
+  clearTimeout(syncTimer);
+  await syncToDrive(false);
+}
+
+async function manualLoad() {
+  if (!confirm('Driveから最新データを読み込みますか？\n※未同期の変更がある場合は上書きされます。')) return;
+  clearTimeout(syncTimer);
+  pendingSync = false;
+  await loadFromDrive();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// 衝突解決モーダル
+// ══════════════════════════════════════════════════════════════════════
+function showConflictModal(serverData, serverTs) {
+  pendingConflict = { data: serverData, timestamp: serverTs };
+  const myCount  = data.items.length;
+  const svCount  = serverData && serverData.items ? serverData.items.length : 0;
+  const svDate   = serverTs ? new Date(serverTs).toLocaleString('ja-JP') : '不明';
+
+  document.getElementById('conflictCols').innerHTML = `
+    <div class="cf-col">
+      <div class="cf-col-hd local">💻 あなたの変更（ローカル）</div>
+      <div class="cf-col-body">
+        <div class="cf-row"><span class="cf-key">品目数</span><span class="cf-val">${myCount} 件</span></div>
+        <div class="cf-row"><span class="cf-key">タイムスタンプ</span><span class="cf-val">${dataTimestamp || '初回'}</span></div>
+      </div>
+    </div>
+    <div class="cf-col">
+      <div class="cf-col-hd server">☁️ サーバーのデータ（Drive）</div>
+      <div class="cf-col-body">
+        <div class="cf-row"><span class="cf-key">品目数</span><span class="cf-val">${svCount} 件</span></div>
+        <div class="cf-row"><span class="cf-key">最終更新</span><span class="cf-val">${svDate}</span></div>
+        <div class="cf-row"><span class="cf-key">タイムスタンプ</span><span class="cf-val">${serverTs || '不明'}</span></div>
+      </div>
+    </div>`;
+  openModal('conflictModal');
+}
+
+function resolveConflict(choice) {
+  closeModal('conflictModal');
+  if (choice === 'server') {
+    data          = pendingConflict.data;
+    dataTimestamp = pendingConflict.timestamp;
+    persistLocal();
+    renderAll();
+    setSyncStatus('ok', '同期済み（サーバー採用）');
+    showToast('☁️ サーバーのデータを適用しました');
+  } else {
+    // 強制上書き
+    syncToDrive(true);
+  }
+  pendingConflict = null;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// UI ヘルパー
+// ══════════════════════════════════════════════════════════════════════
+function setSyncStatus(state, text) {
+  const el = document.getElementById('driveStatus');
+  const ic = document.getElementById('dsIcon');
+  const tx = document.getElementById('dsText');
+  el.className = 'drive-status';
+  const map = {
+    ok:      ['ok',      '☁️',                           text || '同期済み'],
+    pending: ['warn',    '⏳',                            text || '同期待機中...'],
+    syncing: ['syncing', '<span class="ds-spin">🔄</span>', text || '同期中...'],
+    err:     ['err',     '⚠️',                            text || '同期エラー'],
+  };
+  const [cls, icon, label] = map[state] || map.err;
+  el.classList.add(cls);
+  ic.innerHTML   = icon;
+  tx.textContent = label;
+}
+
+function setSyncNowBtn(loading) {
+  const btn  = document.getElementById('syncNowBtn');
+  const icon = document.getElementById('syncNowIcon');
+  btn.disabled = loading;
+  btn.classList.toggle('is-syncing', loading);
+  icon.innerHTML = loading ? '<span class="ds-spin">🔄</span>' : '☁️';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ユーティリティ
+// ══════════════════════════════════════════════════════════════════════
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function fmtH(v)  { return v > 0 ? Number(v).toFixed(2) + ' H' : '-'; }
+function fmtY(v)  { return v > 0 ? '¥' + Number(v).toLocaleString() : '-'; }
+function fmtYn(v) { return '¥' + Number(v||0).toLocaleString(); }
+function nowStr() {
+  const d = new Date();
+  return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function calcCosts(i) {
+  const l1Cost = (i.l1||0)*(i.l1rate||0), mCost  = (i.m||0)*(i.mrate||0);
+  const hqCost = i.hq||0,                  gCost  = i.g||0;
+  const l2Cost = (i.l2||0)*(i.l2rate||0), m2Cost = (i.m2||0)*(i.m2rate||0);
+  return { l1Cost, mCost, hqCost, gCost, l2Cost, m2Cost, totalCost: l1Cost+mCost+hqCost+gCost+l2Cost+m2Cost };
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// リスト構築
+// ══════════════════════════════════════════════════════════════════════
+function buildLists() {
+  const cos  = [...new Set(data.items.map(i=>i.company).filter(Boolean))].sort();
+  const mats = [...new Set(data.items.map(i=>i.material).filter(Boolean))].sort();
+  document.getElementById('dl-co').innerHTML  = cos.map(c=>`<option value="${esc(c)}">`).join('');
+  document.getElementById('dl-mat').innerHTML = mats.map(m=>`<option value="${esc(m)}">`).join('');
+  const mk = (id, arr, ph) => {
+    const cur = document.getElementById(id).value;
+    document.getElementById(id).innerHTML = `<option value="">${ph}</option>` + arr.map(v=>`<option value="${esc(v)}"${v===cur?' selected':''}>${esc(v)}</option>`).join('');
+  };
+  mk('fCo', cos, 'すべて'); mk('fMat', mats, 'すべて');
+  mk('histCo', cos, 'すべての会社');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ダッシュボード
+// ══════════════════════════════════════════════════════════════════════
+function renderDash() {
+  const items = data.items;
+  const totals = items.map(i=>calcCosts(i).totalCost);
+  const avg = totals.length ? Math.round(totals.reduce((a,b)=>a+b,0)/totals.length) : 0;
+  document.getElementById('kpi-total').textContent = items.length;
+  document.getElementById('kpi-co').textContent    = new Set(items.map(i=>i.company).filter(Boolean)).size;
+  document.getElementById('kpi-mat').textContent   = new Set(items.map(i=>i.material).filter(Boolean)).size;
+  document.getElementById('kpi-avg').textContent   = '¥' + avg.toLocaleString();
+
+  const top = [...items].sort((a,b)=>calcCosts(b).totalCost-calcCosts(a).totalCost).slice(0,10);
+  document.getElementById('topCostTable').innerHTML = !top.length
+    ? '<div class="empty"><div class="ei">📭</div><p>データなし</p></div>'
+    : '<table class="mini-tbl"><thead><tr><th>図面番号</th><th>商品名</th><th>会社名</th><th style="text-align:right">合計原価</th></tr></thead><tbody>'
+      + top.map(i=>`<tr onclick="openDetail('${i.id}')"><td class="c-pn">${esc(i.drawingNo||'-')}</td><td>${esc(i.name||'-')}</td><td style="font-size:11px;color:var(--c-text3)">${esc(i.company||'-')}</td><td style="font-family:var(--mono);font-weight:700;color:var(--c-accent);text-align:right">${fmtYn(calcCosts(i).totalCost)}</td></tr>`).join('')
+      + '</tbody></table>';
+
+  const opMap = {'新規登録':['new','🆕'],'編集':['edit','✏️'],'削除':['del','🗑']};
+  document.getElementById('recentLog').innerHTML = !data.logs.length
+    ? '<div class="empty"><div class="ei">📭</div><p>履歴なし</p></div>'
+    : '<div>' + data.logs.slice(0,12).map(l=>{
+        const [cls,ico] = opMap[l.operation]||['new','📋'];
+        return `<div class="tl-item"><div class="tl-dot ${cls}">${ico}</div><div class="tl-info"><div class="tl-name">${esc(l.name||l.drawingNo||'-')}</div><div class="tl-meta">${esc(l.company||'-')}${l.material?' · '+esc(l.material):''}</div></div><div class="tl-right"><div class="tl-op">${l.operation}</div><div class="tl-time">${l.date}</div></div></div>`;
+      }).join('') + '</div>';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// 一覧
+// ══════════════════════════════════════════════════════════════════════
+function getFiltered() {
+  const q   = (document.getElementById('searchBox').value||'').toLowerCase();
+  const co  = document.getElementById('fCo').value;
+  const mat = document.getElementById('fMat').value;
+  return data.items.filter(i => {
+    if (q  && !['company','drawingNo','name','material'].some(k=>String(i[k]||'').toLowerCase().includes(q))) return false;
+    if (co  && i.company  !== co)  return false;
+    if (mat && i.material !== mat) return false;
+    return true;
+  });
+}
+function applyFilters() { renderList(); }
+
+function sortBy(col) {
+  sortDir = sortCol===col ? -sortDir : 1; sortCol = col;
+  document.querySelectorAll('.ctbl thead th').forEach(t=>t.classList.remove('sorted'));
+  document.getElementById('th-'+col)?.classList.add('sorted');
+  renderList();
+}
+
+function renderList() {
+  const items = getFiltered().map(i=>({...i,...calcCosts(i)}));
+  items.sort((a,b)=>{
+    let av=a[sortCol]??'', bv=b[sortCol]??'';
+    if(typeof av==='number'&&typeof bv==='number') return (av-bv)*sortDir;
+    return String(av).localeCompare(String(bv),'ja')*sortDir;
+  });
+  document.getElementById('listCount').textContent = items.length+'件';
+  const body = document.getElementById('listBody');
+  if (!items.length) { body.innerHTML='<tr><td colspan="16"><div class="empty"><div class="ei">📭</div><p>一致するデータなし</p></div></td></tr>'; return; }
+  body.innerHTML = items.map(i=>`
+    <tr data-id="${i.id}" ondblclick="openDetail('${i.id}')">
+      <td class="c-co"   title="${esc(i.company||'')}">${esc(i.company||'-')}</td>
+      <td class="c-pn">${esc(i.drawingNo||'-')}</td>
+      <td class="c-name" title="${esc(i.name||'')}">${esc(i.name||'-')}</td>
+      <td>${i.material?`<span class="c-mat">${esc(i.material)}</span>`:'-'}</td>
+      <td class="c-num grp-l1"  style="border-left:2px solid var(--c-border2)">${i.s>0?Number(i.s).toFixed(2):'-'}</td>
+      <td class="c-num grp-l1">${fmtH(i.l1)}</td>
+      <td class="c-num grp-m"   style="border-left:2px solid var(--c-border2)">${fmtH(i.m)}</td>
+      <td class="c-money grp-m">${fmtY(i.mCost)}</td>
+      <td class="c-money grp-hq" style="border-left:2px solid var(--c-border2)">${fmtY(i.hqCost)}</td>
+      <td class="c-money grp-g">${fmtY(i.gCost)}</td>
+      <td class="c-num grp-l2"  style="border-left:2px solid var(--c-border2)">${fmtH(i.l2)}</td>
+      <td class="c-money grp-l2">${fmtY(i.l2Cost)}</td>
+      <td class="c-num grp-m2"  style="border-left:2px solid var(--c-border2)">${fmtH(i.m2)}</td>
+      <td class="c-money grp-m2">${fmtY(i.m2Cost)}</td>
+      <td class="c-total">${fmtYn(i.totalCost)}</td>
+      <td class="c-act">
+        <button class="btn btn-ghost   btn-sm" onclick="openDetail('${i.id}',event)">詳細</button>
+        <button class="btn btn-primary btn-sm" onclick="editItem('${i.id}',event)">✏️</button>
+        <button class="btn btn-danger  btn-sm" onclick="deleteItem('${i.id}',event)">🗑</button>
+      </td>
+    </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// 詳細モーダル
+// ══════════════════════════════════════════════════════════════════════
+function openDetail(id, evt) {
+  if (evt) evt.stopPropagation();
+  const i = data.items.find(x=>x.id===id); if(!i) return;
+  const c = calcCosts(i);
+  document.getElementById('dd-title').textContent = i.drawingNo||i.name||'詳細';
+  document.getElementById('dd-body').innerHTML = `
+    <div class="detail-section">基本情報</div>
+    <div class="detail-grid">
+      <div class="df"><div class="dl">会社名</div><div class="dv">${esc(i.company||'-')}</div></div>
+      <div class="df"><div class="dl">図面番号</div><div class="dv mono">${esc(i.drawingNo||'-')}</div></div>
+      <div class="df"><div class="dl">商品名</div><div class="dv">${esc(i.name||'-')}</div></div>
+      <div class="df"><div class="dl">材質</div><div class="dv">${i.material?`<span class="c-mat">${esc(i.material)}</span>`:'-'}</div></div>
+      <div class="df"><div class="dl">S</div><div class="dv mono">${i.s>0?Number(i.s).toFixed(2):'-'}</div></div>
+      <div class="df"><div class="dl">登録日時</div><div class="dv" style="font-size:11px;color:var(--c-text3)">${i.createdAt||'-'}</div></div>
+    </div>
+    <div class="detail-section">L1 加工 / M 材料</div>
+    <div class="detail-grid">
+      <div class="df"><div class="dl">L1 加工時間</div><div class="dv mono">${fmtH(i.l1)}</div></div>
+      <div class="df"><div class="dl">L1 時間単価</div><div class="dv mono">${fmtY(i.l1rate)}/H</div></div>
+      <div class="df"><div class="dl">M 材料時間</div><div class="dv mono">${fmtH(i.m)}</div></div>
+      <div class="df"><div class="dl">M 時間単価</div><div class="dv mono">${fmtY(i.mrate)}/H</div></div>
+    </div>
+    <div class="detail-section">外注費</div>
+    <div class="detail-grid">
+      <div class="df"><div class="dl">HQ（外注）</div><div class="dv mono">${fmtY(i.hq)}</div></div>
+      <div class="df"><div class="dl">G（外注）</div><div class="dv mono">${fmtY(i.g)}</div></div>
+    </div>
+    <div class="detail-section">L2 加工 / M2 材料</div>
+    <div class="detail-grid">
+      <div class="df"><div class="dl">L2 加工時間</div><div class="dv mono">${fmtH(i.l2)}</div></div>
+      <div class="df"><div class="dl">L2 時間単価</div><div class="dv mono">${fmtY(i.l2rate)}/H</div></div>
+      <div class="df"><div class="dl">M2 材料時間</div><div class="dv mono">${fmtH(i.m2)}</div></div>
+      <div class="df"><div class="dl">M2 時間単価</div><div class="dv mono">${fmtY(i.m2rate)}/H</div></div>
+    </div>
+    <div class="detail-section">原価内訳</div>
+    <div class="detail-grid">
+      <div class="df"><div class="dl">L1原価</div><div class="dv mono">${fmtYn(c.l1Cost)}</div></div>
+      <div class="df"><div class="dl">M原価</div><div class="dv mono">${fmtYn(c.mCost)}</div></div>
+      <div class="df"><div class="dl">HQ外注</div><div class="dv mono">${fmtYn(c.hqCost)}</div></div>
+      <div class="df"><div class="dl">G外注</div><div class="dv mono">${fmtYn(c.gCost)}</div></div>
+      <div class="df"><div class="dl">L2原価</div><div class="dv mono">${fmtYn(c.l2Cost)}</div></div>
+      <div class="df"><div class="dl">M2原価</div><div class="dv mono">${fmtYn(c.m2Cost)}</div></div>
+      <div class="df full"><div class="dl">合計原価</div><div class="dv big">${fmtYn(c.totalCost)}</div></div>
+    </div>`;
+  document.getElementById('dd-footer').innerHTML = `
+    <button class="btn btn-ghost"   onclick="closeModal('detailModal')">閉じる</button>
+    <button class="btn btn-primary" onclick="closeModal('detailModal');editItem('${i.id}')">✏️ 編集</button>
+    <button class="btn btn-danger"  onclick="closeModal('detailModal');deleteItem('${i.id}')">🗑 削除</button>`;
+  openModal('detailModal');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// フォーム
+// ══════════════════════════════════════════════════════════════════════
+const nv = id => parseFloat(document.getElementById(id).value)||0;
+const sv = id => (document.getElementById(id).value||'').trim();
+
+function updatePreview() {
+  const l1c=nv('f-l1')*nv('f-l1rate'), mc=nv('f-m')*nv('f-mrate');
+  const hqc=nv('f-hq'), gc=nv('f-g');
+  const l2c=nv('f-l2')*nv('f-l2rate'), m2c=nv('f-m2')*nv('f-m2rate');
+  const tot=l1c+mc+hqc+gc+l2c+m2c;
+  ['l1','m','hq','g','l2','m2'].forEach((k,i)=>{ document.getElementById('prev-'+k).textContent=fmtYn([l1c,mc,hqc,gc,l2c,m2c][i]); });
+  document.getElementById('prev-total').textContent = fmtYn(tot);
+}
+
+function resetForm() {
+  editId = null;
+  document.getElementById('formTitle').textContent = '📋 商品原価 新規登録';
+  document.getElementById('submitBtn').textContent = '✅ 登録する';
+  document.getElementById('submitBtn').disabled    = false;
+  ['f-company','f-drawingNo','f-name','f-material',
+   'f-s','f-l1','f-l1rate','f-m','f-mrate','f-hq','f-g','f-l2','f-l2rate','f-m2','f-m2rate']
+    .forEach(id => document.getElementById(id).value = '');
+  updatePreview();
+}
+
+function editItem(id, evt) {
+  if (evt) evt.stopPropagation();
+  const i = data.items.find(x=>x.id===id); if(!i) return;
+  editId = id;
+  document.getElementById('formTitle').textContent = '✏️ 原価データ編集';
+  document.getElementById('submitBtn').textContent = '💾 更新する';
+  const s = (fid,val)=>{ document.getElementById(fid).value=val||''; };
+  s('f-company',i.company); s('f-drawingNo',i.drawingNo); s('f-name',i.name); s('f-material',i.material);
+  s('f-s',i.s); s('f-l1',i.l1); s('f-l1rate',i.l1rate); s('f-m',i.m); s('f-mrate',i.mrate);
+  s('f-hq',i.hq); s('f-g',i.g); s('f-l2',i.l2); s('f-l2rate',i.l2rate); s('f-m2',i.m2); s('f-m2rate',i.m2rate);
+  updatePreview();
+  switchPage('add');
+}
+
+function submitForm() {
+  const company=sv('f-company'), drawingNo=sv('f-drawingNo'), name=sv('f-name');
+  if (!company)   { showToast('⚠ 会社名を入力してください');   return; }
+  if (!drawingNo) { showToast('⚠ 図面番号を入力してください'); return; }
+  if (!name)      { showToast('⚠ 商品名を入力してください');   return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '処理中...';
+
+  const item = {
+    company, drawingNo, name, material: sv('f-material'),
+    s: nv('f-s'), l1: nv('f-l1'), l1rate: nv('f-l1rate'),
+    m: nv('f-m'), mrate: nv('f-mrate'), hq: nv('f-hq'), g: nv('f-g'),
+    l2: nv('f-l2'), l2rate: nv('f-l2rate'), m2: nv('f-m2'), m2rate: nv('f-m2rate'),
+  };
+
+  if (editId) {
+    const idx = data.items.findIndex(x=>x.id===editId);
+    if (idx >= 0) {
+      item.id = editId; item.createdAt = data.items[idx].createdAt;
+      data.items[idx] = item;
+      addLog(item, '編集');
+      save(editId);  // 楽観的UI: 即時反映
+      showToast('✅ 更新しました: ' + name);
+    }
+  } else {
+    item.id = 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+    item.createdAt = nowStr();
+    data.items.push(item);
+    addLog(item, '新規登録');
+    save(item.id);  // 楽観的UI: 即時反映
+    showToast('✅ 登録しました: ' + name);
+  }
+  resetForm();
+  switchPage('list');
+}
+
+function deleteItem(id, evt) {
+  if (evt) evt.stopPropagation();
+  const i = data.items.find(x=>x.id===id);
+  if (!i || !confirm(`「${i.name||i.drawingNo}」を削除しますか？`)) return;
+  addLog(i, '削除');
+  data.items = data.items.filter(x=>x.id!==id);
+  save(null);
+  showToast('🗑 削除しました');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// 履歴
+// ══════════════════════════════════════════════════════════════════════
+function addLog(item, op) {
+  data.logs.unshift({ date: nowStr(), company: item.company||'-', drawingNo: item.drawingNo||'-', name: item.name||'-', material: item.material||'-', operation: op });
+  if (data.logs.length > 2000) data.logs.pop();
+}
+
+function renderHistory() {
+  const op = document.getElementById('histOp').value;
+  const co = document.getElementById('histCo').value;
+  const logs = data.logs.filter(l=>(!op||l.operation===op)&&(!co||l.company===co));
+  document.getElementById('histCnt').textContent = logs.length+'件';
+  const opMap = {'新規登録':['new','🆕'],'編集':['edit','✏️'],'削除':['del','🗑']};
+  document.getElementById('histList').innerHTML = !logs.length
+    ? '<div class="empty"><div class="ei">📭</div><p>履歴なし</p></div>'
+    : '<div>' + logs.map(l=>{
+        const [cls,ico] = opMap[l.operation]||['new','📋'];
+        return `<div class="tl-item"><div class="tl-dot ${cls}">${ico}</div><div class="tl-info"><div class="tl-name">${esc(l.name||l.drawingNo||'-')}</div><div class="tl-meta">${esc(l.company||'-')}${l.material?' · '+esc(l.material):''} · 図番: ${esc(l.drawingNo||'-')}</div></div><div class="tl-right"><div class="tl-op">${l.operation}</div><div class="tl-time">${l.date}</div></div></div>`;
+      }).join('') + '</div>';
+}
+
+function clearHistory() {
+  if (!confirm('履歴をすべて削除しますか？')) return;
+  data.logs = []; save(null); showToast('🗑 履歴削除');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// バックアップ / 復元 / CSV
+// ══════════════════════════════════════════════════════════════════════
+function exportData() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify({...data,_ts:dataTimestamp},null,2)],{type:'application/json'}));
+  a.download = `cost_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); showToast('💾 バックアップ保存完了');
+}
+
+function importData(e) {
+  const file = e.target.files[0]; if(!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      if (!d.items) throw 0;
+      data = { items: d.items, logs: d.logs||[] };
+      if (d._ts) dataTimestamp = d._ts;
+      save(null); showToast('📂 復元完了: ' + d.items.length + '件');
+    } catch { showToast('⚠ 読み込み失敗'); }
+  };
+  r.readAsText(file); e.target.value = '';
+}
+
+function exportCSV() {
+  const items = getFiltered().map(i=>({...i,...calcCosts(i)}));
+  const h = ['会社名','図面番号','商品名','材質','S','L1(H)','L1単価(円/H)','M(H)','M単価(円/H)','HQ外注(円)','G外注(円)','L2(H)','L2単価(円/H)','M2(H)','M2単価(円/H)','L1原価(円)','M原価(円)','HQ原価(円)','G原価(円)','L2原価(円)','M2原価(円)','合計原価(円)'];
+  const rows = items.map(i=>[i.company||'',i.drawingNo||'',i.name||'',i.material||'',i.s||0,i.l1||0,i.l1rate||0,i.m||0,i.mrate||0,i.hq||0,i.g||0,i.l2||0,i.l2rate||0,i.m2||0,i.m2rate||0,i.l1Cost,i.mCost,i.hqCost,i.gCost,i.l2Cost,i.m2Cost,i.totalCost].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+[h.join(','),...rows].join('\n')],{type:'text/csv;charset=utf-8'}));
+  a.download = `cost_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); showToast('📊 CSV出力完了');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ページ切替 / モーダル / サイドバー / トースト
+// ══════════════════════════════════════════════════════════════════════
+const PAGES = ['dash','list','add','hist'];
+function switchPage(p) {
+  PAGES.forEach(x => {
+    document.getElementById('page-'+x).classList.toggle('active', x===p);
+    ['nav-','mn-'].forEach(pfx => { const el=document.getElementById(pfx+x); if(el) el.classList.toggle('active',x===p); });
+  });
+  if (p !== 'add') resetForm();
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sb-backdrop').classList.remove('show');
+}
+
+function toggleSidebar() {
+  const sb=document.getElementById('sidebar'), bd=document.getElementById('sb-backdrop');
+  sb.classList.toggle('open');
+  bd.classList.toggle('show', sb.classList.contains('open'));
+}
+
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
+
+let toastTimer;
+function showToast(msg, dur=2600) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'), dur);
+}
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape') document.querySelectorAll('.overlay.open').forEach(el=>el.classList.remove('open'));
+});
+</script>
+</body>
+</html>

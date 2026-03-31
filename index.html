@@ -3,19 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>東武 在庫管理システム</title>
+<title>東武 業務システム ポータル</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-
 <style>
-/* ==========================================================================
-   既存のCSSスタイルは変更なし
-   ========================================================================== */
 :root {
   --c-bg:        #f0f2f5;
   --c-surface:   #ffffff;
   --c-surface2:  #f7f8fa;
   --c-border:    #e2e5ea;
-  --c-border2:   #cbd0d8;
   --c-text:      #1a1d23;
   --c-text2:     #5a6070;
   --c-text3:     #9099a8;
@@ -24,1174 +19,388 @@
   --c-accent-bg: #eef3fd;
   --c-green:     #0e7c3a;
   --c-green-bg:  #e6f6ec;
-  --c-red:       #c0392b;
-  --c-red-bg:    #fdf0ee;
   --c-yellow:    #a16207;
   --c-yellow-bg: #fef9eb;
   --c-steel:     #2c3e50;
+  --c-steel-d:   #1a252f;
   --shadow-sm:   0 1px 3px rgba(0,0,0,.08);
   --shadow-md:   0 4px 16px rgba(0,0,0,.10);
-  --shadow-lg:   0 12px 40px rgba(0,0,0,.14);
-  --r:           6px;
-  --r-lg:        10px;
+  --shadow-lg:   0 12px 40px rgba(0,0,0,.16);
+  --r:           8px;
+  --r-lg:        14px;
   --font:        'Noto Sans JP', sans-serif;
   --mono:        'IBM Plex Mono', monospace;
-  --sidebar-w:   240px;
-  --header-h:    56px;
+  --header-h:    60px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
-body { font-family: var(--font); background: var(--c-bg); color: var(--c-text); font-size: 13px; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
-button { font-family: var(--font); cursor: pointer; }
-input, select, textarea { font-family: var(--font); }
+body {
+  font-family: var(--font);
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-size: 14px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
 
-/* OAuth画面削除済みの為シェルを常に表示 */
-#shell { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-#topbar { height: var(--header-h); background: var(--c-steel); display: flex; align-items: center; padding: 0 16px; gap: 12px; flex-shrink: 0; position: relative; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,.3); }
-.logo { display: flex; align-items: center; gap: 10px; color: #fff; flex-shrink: 0; }
-.logo-icon { font-size: 22px; }
-.logo-text { font-size: 15px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; }
-.logo-text span { color: #7dd3fc; }
-.tb-sep { width: 1px; height: 28px; background: rgba(255,255,255,.15); flex-shrink: 0; }
-.tb-search { flex: 1; max-width: 380px; position: relative; }
-.tb-search input { width: 100%; background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.15); border-radius: 6px; color: #fff; padding: 7px 10px 7px 32px; font-size: 13px; outline: none; transition: background .15s, border-color .15s; }
-.tb-search input::placeholder { color: rgba(255,255,255,.45); }
-.tb-search input:focus { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.35); }
-.tb-search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,.5); font-size: 14px; pointer-events: none; }
-.tb-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-.tb-alert { background: #e74c3c; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; white-space: nowrap; display: none; }
-.tb-btn { background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.18); color: rgba(255,255,255,.85); padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 5px; transition: all .15s; white-space: nowrap; }
-.tb-btn:hover { background: rgba(255,255,255,.20); color: #fff; }
+/* ── ヘッダー ── */
+header {
+  height: var(--header-h);
+  background: var(--c-steel);
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  gap: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(0,0,0,.35);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.h-logo { display: flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; }
+.h-logo-icon { font-size: 26px; }
+.h-logo-name { font-size: 17px; font-weight: 700; letter-spacing: -.01em; line-height: 1.2; }
+.h-logo-name span { color: #7dd3fc; }
+.h-logo-sub { font-size: 10px; color: rgba(255,255,255,.45); letter-spacing: .06em; text-transform: uppercase; font-weight: 500; }
+.h-sep { width: 1px; height: 30px; background: rgba(255,255,255,.15); }
+.h-tagline { color: rgba(255,255,255,.55); font-size: 12px; font-weight: 500; }
+.h-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.h-date { color: rgba(255,255,255,.5); font-family: var(--mono); font-size: 11px; }
 
-#hamburger { display: none; background: none; border: none; color: #fff; font-size: 22px; padding: 4px; cursor: pointer; }
+/* ── メインコンテンツ ── */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 52px 24px 60px;
+  gap: 0;
+}
 
-#body { flex: 1; display: flex; overflow: hidden; }
-#sidebar { width: var(--sidebar-w); background: var(--c-surface); border-right: 1px solid var(--c-border); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; transition: transform .25s ease; }
-.sb-section { padding: 14px 10px 6px; }
-.sb-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--c-text3); padding: 0 6px; margin-bottom: 6px; }
-.nav-item { display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: var(--r); color: var(--c-text2); font-size: 13px; font-weight: 500; cursor: pointer; transition: all .12s; position: relative; }
-.nav-item:hover { background: var(--c-bg); color: var(--c-text); }
-.nav-item.active { background: var(--c-accent-bg); color: var(--c-accent); font-weight: 600; }
-.nav-item .ni { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
-.nav-badge { margin-left: auto; background: var(--c-red); color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; }
-.sb-divider { height: 1px; background: var(--c-border); margin: 6px 10px; }
-.sb-filter { padding: 0 10px 12px; }
-.sb-filter-title { font-size: 10px; font-weight: 700; color: var(--c-text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 5px; margin-top: 10px; }
-.sb-select { width: 100%; background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--r); color: var(--c-text); padding: 8px 28px 8px 10px; font-size: 12px; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239099a8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; }
-.sb-select:focus { border-color: var(--c-accent); }
+/* ヒーローセクション */
+.hero {
+  text-align: center;
+  margin-bottom: 52px;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--c-accent-bg);
+  color: var(--c-accent);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.hero-title {
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--c-steel);
+  line-height: 1.2;
+  letter-spacing: -.02em;
+  margin-bottom: 14px;
+}
+.hero-title span { color: var(--c-accent); }
+.hero-desc {
+  font-size: 15px;
+  color: var(--c-text2);
+  line-height: 1.7;
+  max-width: 460px;
+  margin: 0 auto;
+}
 
-.drive-status { margin: 6px 10px 10px; padding: 8px 10px; border-radius: var(--r); font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-.drive-status.ok { background: var(--c-green-bg); color: var(--c-green); }
-.drive-status.warn { background: var(--c-yellow-bg); color: var(--c-yellow); }
-.drive-status.err { background: var(--c-red-bg); color: var(--c-red); }
+/* ── アプリカードグリッド ── */
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+  width: 100%;
+  max-width: 860px;
+  margin-bottom: 52px;
+}
 
-#content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-.page { display: none; flex-direction: column; flex: 1; overflow: hidden; }
-.page.active { display: flex; }
+.app-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  cursor: pointer;
+}
+.app-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--c-border);
+}
+.app-card:hover .card-arrow { opacity: 1; transform: translateX(3px); }
 
-#page-dash { overflow-y: auto; }
-.dash-inner { padding: 20px; display: flex; flex-direction: column; gap: 18px; max-width: 1400px; }
-.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.kpi-card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-lg); padding: 16px 18px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 5px; }
-.kpi-icon { font-size: 20px; }
-.kpi-val { font-size: 32px; font-weight: 900; font-family: var(--mono); line-height: 1.1; }
-.kpi-lbl { font-size: 12px; color: var(--c-text2); font-weight: 500; }
-.kpi-card.blue .kpi-val { color: var(--c-accent); }
-.kpi-card.red  .kpi-val { color: var(--c-red); }
-.kpi-card.green .kpi-val { color: var(--c-green); }
-.kpi-card.yellow .kpi-val { color: var(--c-yellow); }
-.dash-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
-.card-hd { padding: 12px 16px; border-bottom: 1px solid var(--c-border); font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-.card-body { overflow: auto; max-height: 300px; }
-.mini-tbl { width: 100%; border-collapse: collapse; }
-.mini-tbl th, .mini-tbl td { padding: 8px 12px; text-align: left; font-size: 12px; }
-.mini-tbl th { background: var(--c-surface2); color: var(--c-text3); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--c-border); }
-.mini-tbl td { border-bottom: 1px solid var(--c-border); }
-.mini-tbl tr:last-child td { border-bottom: none; }
-.mini-tbl tbody tr:hover td { background: var(--c-bg); cursor: pointer; }
-.timeline { }
-.tl-item { display: flex; align-items: flex-start; padding: 9px 14px; gap: 10px; border-bottom: 1px solid var(--c-border); transition: background .1s; }
-.tl-item:last-child { border-bottom: none; }
-.tl-item:hover { background: var(--c-bg); }
-.tl-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; margin-top: 2px; }
-.tl-dot.in  { background: var(--c-green-bg); }
-.tl-dot.out { background: var(--c-red-bg); }
-.tl-dot.new { background: var(--c-accent-bg); }
-.tl-dot.del { background: var(--c-surface2); }
-.tl-info { flex: 1; min-width: 0; }
-.tl-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tl-meta { font-size: 11px; color: var(--c-text3); margin-top: 1px; }
-.tl-right { text-align: right; flex-shrink: 0; }
-.tl-chg { font-family: var(--mono); font-size: 13px; font-weight: 700; }
-.tl-chg.plus { color: var(--c-green); }
-.tl-chg.minus { color: var(--c-red); }
-.tl-time { font-size: 10px; color: var(--c-text3); margin-top: 2px; }
+/* カラーバー */
+.card-bar {
+  height: 5px;
+  width: 100%;
+  flex-shrink: 0;
+}
+.app-card.blue   .card-bar { background: linear-gradient(90deg, #1a56db, #60a5fa); }
+.app-card.green  .card-bar { background: linear-gradient(90deg, #0e7c3a, #34d399); }
+.app-card.yellow .card-bar { background: linear-gradient(90deg, #a16207, #fbbf24); }
+.app-card.purple .card-bar { background: linear-gradient(90deg, #6d28d9, #a78bfa); }
 
-.inv-bar { padding: 10px 14px; background: var(--c-surface); border-bottom: 1px solid var(--c-border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
-.count-chip { background: var(--c-accent-bg); color: var(--c-accent); font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 12px; }
-.bar-right { margin-left: auto; display: flex; gap: 7px; }
-.btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 13px; border-radius: var(--r); font-size: 13px; font-weight: 600; border: 1px solid transparent; cursor: pointer; transition: all .12s; white-space: nowrap; }
-.btn-primary { background: var(--c-accent); color: #fff; border-color: var(--c-accent); }
-.btn-primary:hover { background: var(--c-accent-h); }
-.btn-ghost { background: var(--c-surface); color: var(--c-text2); border-color: var(--c-border); }
-.btn-ghost:hover { background: var(--c-bg); color: var(--c-text); }
-.btn-danger { background: var(--c-red-bg); color: var(--c-red); border-color: #f5c6c2; }
-.btn-danger:hover { background: #faddda; }
-.btn-green { background: var(--c-green-bg); color: var(--c-green); border-color: #b7e5c8; }
-.btn-green:hover { background: #d0f0de; }
-.btn-sm { padding: 4px 10px; font-size: 12px; }
+.card-inner { padding: 26px 28px 24px; display: flex; flex-direction: column; flex: 1; }
 
-.tbl-wrap { flex: 1; overflow: auto; }
-table.itbl { width: 100%; border-collapse: collapse; min-width: 860px; }
-table.itbl thead th { background: var(--c-steel); color: rgba(255,255,255,.82); padding: 10px 11px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; white-space: nowrap; position: sticky; top: 0; z-index: 5; border-right: 1px solid rgba(255,255,255,.08); cursor: pointer; user-select: none; transition: background .12s; }
-table.itbl thead th:last-child { border-right: none; cursor: default; }
-table.itbl thead th:hover:not(:last-child) { background: #3d5166; }
-table.itbl thead th.sorted { background: #1a3c57; }
-.sort-arrow { color: rgba(255,255,255,.35); margin-left: 3px; font-size: 10px; }
-table.itbl thead th.sorted .sort-arrow { color: #7dd3fc; }
-table.itbl tbody tr { border-bottom: 1px solid var(--c-border); transition: background .1s; }
-table.itbl tbody tr:hover { background: #f2f6ff; }
-table.itbl tbody tr.alert-row { background: #fff9f8; }
-table.itbl tbody tr.alert-row:hover { background: #ffeeed; }
-table.itbl tbody td { padding: 9px 11px; vertical-align: middle; font-size: 13px; }
+.card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
 
-.c-tag { font-family: var(--mono); font-size: 11px; color: var(--c-text3); text-align: center; }
-.c-pn  { font-family: var(--mono); font-weight: 600; color: var(--c-accent); font-size: 12px; }
-.c-name { font-weight: 500; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.c-co   { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-.c-mat  { display: inline-block; background: #eef2fb; color: #3b5bdb; font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; white-space: nowrap; }
-.c-price { font-family: var(--mono); font-size: 12px; color: var(--c-text2); text-align: right; white-space: nowrap; }
-.c-qty  { font-family: var(--mono); font-size: 15px; font-weight: 700; text-align: center; white-space: nowrap; }
-.c-qty.ok   { color: var(--c-green); }
-.c-qty.warn { color: var(--c-red); }
-.badge-alert { display: inline-block; background: var(--c-red); color: #fff; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; margin-left: 4px; vertical-align: middle; }
-.c-act { display: flex; gap: 4px; align-items: center; white-space: nowrap; }
+.card-icon-wrap {
+  width: 54px; height: 54px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+.app-card.blue   .card-icon-wrap { background: #dbeafe; }
+.app-card.green  .card-icon-wrap { background: #d1fae5; }
+.app-card.yellow .card-icon-wrap { background: #fef3c7; }
+.app-card.purple .card-icon-wrap { background: #ede9fe; }
 
-.pdf-progress { display: none; position: fixed; bottom: 20px; right: 20px; background: var(--c-steel); color: #fff; border-radius: 10px; padding: 12px 16px; font-size: 13px; z-index: 500; box-shadow: var(--shadow-lg); min-width: 200px; }
-.pdf-progress.show { display: block; }
-.pdf-prog-bar { height: 4px; background: rgba(255,255,255,.2); border-radius: 2px; margin-top: 8px; overflow: hidden; }
-.pdf-prog-fill { height: 100%; background: #7dd3fc; border-radius: 2px; transition: width .3s; width: 0%; }
+.card-arrow {
+  font-size: 18px;
+  color: var(--c-text3);
+  opacity: 0;
+  transition: opacity .18s, transform .18s;
+  margin-top: 4px;
+}
 
-#page-add { overflow-y: auto; }
-.form-wrap { max-width: 860px; margin: 22px auto; padding: 0 20px 60px; }
-.form-title { font-size: 17px; font-weight: 800; margin-bottom: 14px; color: var(--c-steel); }
-.form-card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 14px; }
-.form-card-hd { padding: 12px 18px; background: var(--c-surface2); border-bottom: 1px solid var(--c-border); font-size: 11px; font-weight: 700; color: var(--c-text2); text-transform: uppercase; letter-spacing: .07em; }
-.form-grid { display: grid; }
-.form-row { display: grid; gap: 0; border-bottom: 1px solid var(--c-border); }
-.form-row:last-child { border-bottom: none; }
-.form-row.c1 { grid-template-columns: 1fr; }
-.form-row.c2 { grid-template-columns: 1fr 1fr; }
-.form-row.c3 { grid-template-columns: 1fr 1fr 1fr; }
-.form-row.c4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
-.form-field { padding: 13px 16px; border-right: 1px solid var(--c-border); display: flex; flex-direction: column; gap: 6px; }
-.form-field:last-child { border-right: none; }
-.form-label { font-size: 11px; font-weight: 700; color: var(--c-text2); }
-.req { color: var(--c-red); margin-left: 2px; }
-.form-input, .form-select { background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--r); color: var(--c-text); font-size: 14px; padding: 9px 11px; outline: none; transition: border-color .15s, box-shadow .15s; width: 100%; -webkit-appearance: none; }
-.form-input:focus, .form-select:focus { border-color: var(--c-accent); box-shadow: 0 0 0 3px rgba(26,86,219,.10); }
-.form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239099a8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; padding-right: 30px; }
-.form-hint { font-size: 11px; color: var(--c-text3); }
-.pdf-drop { background: var(--c-surface2); border: 2px dashed var(--c-border2); border-radius: var(--r); padding: 18px; text-align: center; color: var(--c-text3); cursor: pointer; transition: all .15s; font-size: 13px; }
-.pdf-drop:hover { border-color: var(--c-accent); color: var(--c-accent); }
-.pdf-drop.has { border-color: var(--c-green); color: var(--c-green); background: var(--c-green-bg); }
-.pdf-drop.uploading { border-color: var(--c-accent); color: var(--c-accent); background: var(--c-accent-bg); cursor: wait; }
-.form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
-.form-actions .btn { padding: 10px 22px; font-size: 14px; }
+.card-title { font-size: 18px; font-weight: 800; color: var(--c-text); margin-bottom: 6px; letter-spacing: -.01em; }
+.card-desc  { font-size: 13px; color: var(--c-text2); line-height: 1.65; flex: 1; }
 
-.hist-bar { padding: 10px 14px; background: var(--c-surface); border-bottom: 1px solid var(--c-border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
-.hist-sel { background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--r); color: var(--c-text); padding: 7px 28px 7px 10px; font-size: 12px; outline: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239099a8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; }
-.hist-cnt { font-size: 12px; color: var(--c-text3); }
-.hist-list { flex: 1; overflow-y: auto; }
+.card-footer {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--c-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  letter-spacing: .04em;
+  font-family: var(--mono);
+}
+.app-card.blue   .tag { background: var(--c-accent-bg); color: var(--c-accent); }
+.app-card.green  .tag { background: var(--c-green-bg);  color: var(--c-green); }
+.app-card.yellow .tag { background: var(--c-yellow-bg); color: var(--c-yellow); }
+.app-card.purple .tag { background: #ede9fe; color: #6d28d9; }
 
-.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; backdrop-filter: blur(2px); align-items: center; justify-content: center; padding: 20px; }
-.overlay.open { display: flex; }
-.modal { background: var(--c-surface); border-radius: var(--r-lg); border: 1px solid var(--c-border); box-shadow: var(--shadow-lg); width: 100%; max-width: 460px; animation: popIn .18s ease; overflow: hidden; }
-@keyframes popIn { from { transform: scale(.93); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.modal-hd { padding: 15px 18px; border-bottom: 1px solid var(--c-border); display: flex; align-items: center; justify-content: space-between; }
-.modal-title { font-size: 16px; font-weight: 700; }
-.modal-close { width: 28px; height: 28px; background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: 50%; color: var(--c-text2); font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-.modal-close:hover { background: var(--c-bg); }
-.modal-body { padding: 18px; }
-.modal-footer { padding: 12px 18px; border-top: 1px solid var(--c-border); display: flex; gap: 8px; justify-content: flex-end; }
+.card-launch {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: var(--r);
+  border: none;
+  cursor: pointer;
+  transition: all .15s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.app-card.blue   .card-launch { background: var(--c-accent);    color: #fff; }
+.app-card.blue   .card-launch:hover { background: var(--c-accent-h); }
+.app-card.green  .card-launch { background: var(--c-green);     color: #fff; }
+.app-card.green  .card-launch:hover { background: #0a6230; }
+.app-card.yellow .card-launch { background: var(--c-yellow);    color: #fff; }
+.app-card.yellow .card-launch:hover { background: #8a5206; }
+.app-card.purple .card-launch { background: #6d28d9; color: #fff; }
+.app-card.purple .card-launch:hover { background: #5b21b6; }
 
-.sm-ctx { background: var(--c-surface2); border-radius: var(--r); padding: 11px 13px; margin-bottom: 16px; }
-.sm-ctx .sm-pn { font-family: var(--mono); font-size: 11px; color: var(--c-accent); font-weight: 600; }
-.sm-ctx .sm-name { font-size: 15px; font-weight: 700; margin: 2px 0; }
-.sm-ctx .sm-meta { font-size: 12px; color: var(--c-text3); }
-.mode-tabs { display: flex; border-radius: var(--r); overflow: hidden; border: 1px solid var(--c-border); margin-bottom: 16px; }
-.mode-tab { flex: 1; padding: 10px; text-align: center; font-size: 14px; font-weight: 700; cursor: pointer; background: var(--c-surface2); color: var(--c-text3); border: none; transition: all .15s; }
-.mode-tab.active.in  { background: var(--c-green-bg); color: var(--c-green); }
-.mode-tab.active.out { background: var(--c-red-bg);   color: var(--c-red); }
-.qty-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-.qty-step { width: 36px; height: 36px; border-radius: 50%; background: var(--c-surface2); border: 1px solid var(--c-border); font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; color: var(--c-text); flex-shrink: 0; }
-.qty-step:hover { background: var(--c-bg); }
-.qty-inp { flex: 1; text-align: center; font-size: 26px; font-weight: 700; font-family: var(--mono); background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--r); padding: 10px; outline: none; }
-.qty-inp:focus { border-color: var(--c-accent); }
-.sm-preview { background: var(--c-surface2); border-radius: var(--r); padding: 10px 14px; font-size: 13px; text-align: center; }
-.sm-preview .pv { font-family: var(--mono); font-size: 17px; font-weight: 700; }
-.pv.ok { color: var(--c-green); }
-.pv.warn { color: var(--c-red); }
+/* ── お知らせ / インフォバー ── */
+.info-bar {
+  width: 100%;
+  max-width: 860px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.info-bar-hd {
+  padding: 13px 20px;
+  background: var(--c-surface2);
+  border-bottom: 1px solid var(--c-border);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--c-text3);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.info-list {}
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--c-border);
+  font-size: 13px;
+}
+.info-item:last-child { border-bottom: none; }
+.info-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.info-dot.blue   { background: var(--c-accent); }
+.info-dot.green  { background: var(--c-green); }
+.info-dot.yellow { background: #f59e0b; }
+.info-text { flex: 1; color: var(--c-text2); }
+.info-date { font-family: var(--mono); font-size: 11px; color: var(--c-text3); white-space: nowrap; }
 
-.detail-qty { text-align: center; padding: 16px 0; border-bottom: 1px solid var(--c-border); margin-bottom: 16px; }
-.dq-num { font-size: 48px; font-weight: 900; font-family: var(--mono); line-height: 1; }
-.dq-num.ok { color: var(--c-green); }
-.dq-num.warn { color: var(--c-red); }
-.dq-sub { font-size: 12px; color: var(--c-text3); margin-top: 4px; }
-.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--c-border); border-radius: var(--r); overflow: hidden; margin-bottom: 14px; }
-.df { padding: 9px 12px; border-bottom: 1px solid var(--c-border); border-right: 1px solid var(--c-border); }
-.df:nth-child(even) { border-right: none; }
-.df:nth-last-child(-n+2) { border-bottom: none; }
-.dl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--c-text3); margin-bottom: 3px; }
-.dv { font-size: 13px; font-weight: 600; }
-.dv.mono { font-family: var(--mono); color: var(--c-accent); }
+/* ── フッター ── */
+footer {
+  text-align: center;
+  padding: 22px;
+  font-size: 11px;
+  color: var(--c-text3);
+  border-top: 1px solid var(--c-border);
+  background: var(--c-surface);
+}
 
-.empty { text-align: center; padding: 48px 20px; color: var(--c-text3); }
-.ei { font-size: 36px; margin-bottom: 10px; }
-.empty p { font-size: 14px; }
-
-#mnav { display: none; }
-.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--c-steel); color: #fff; padding: 10px 20px; border-radius: 24px; font-size: 13px; font-weight: 600; opacity: 0; transition: all .25s; pointer-events: none; z-index: 900; white-space: nowrap; }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-#sb-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 99; }
-
-@media (max-width: 768px) {
-  #sidebar { position: fixed; left: 0; top: var(--header-h); bottom: 0; z-index: 100; transform: translateX(-100%); width: 240px; }
-  #sidebar.open { transform: translateX(0); }
-  #sb-backdrop.show { display: block; }
-  #hamburger { display: flex; }
-  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-  .dash-cols { grid-template-columns: 1fr; }
-  .form-row.c4 { grid-template-columns: 1fr 1fr; }
-  .form-row.c3 { grid-template-columns: 1fr 1fr; }
-  #mnav { display: flex; background: var(--c-surface); border-top: 1px solid var(--c-border); position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; box-shadow: 0 -2px 10px rgba(0,0,0,.08); }
-  .mn-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 4px; font-size: 10px; color: var(--c-text3); cursor: pointer; position: relative; transition: color .12s; }
-  .mn-item.active { color: var(--c-accent); }
-  .mni { font-size: 18px; margin-bottom: 2px; }
-  .mn-badge { position: absolute; top: 6px; right: calc(50% - 16px); background: var(--c-red); color: #fff; font-size: 9px; font-weight: 700; padding: 1px 4px; border-radius: 8px; }
-  #content { padding-bottom: 60px; }
+/* ── レスポンシブ ── */
+@media (max-width: 640px) {
+  .app-grid { grid-template-columns: 1fr; }
+  main { padding: 32px 16px 48px; }
+  .hero-title { font-size: 26px; }
+  .h-tagline, .h-sep { display: none; }
+  header { padding: 0 16px; }
 }
 </style>
 </head>
 <body>
 
-<div id="shell">
-
-<div id="topbar">
-  <button id="hamburger" onclick="toggleSidebar()">☰</button>
-  <div class="logo">
-    <span class="logo-icon">🔩</span>
-    <span class="logo-text">東武<span> 在庫管理</span></span>
-  </div>
-  <div class="tb-sep"></div>
-  <div class="tb-search">
-    <span class="tb-search-icon">🔍</span>
-    <input type="text" placeholder="図面番号・品名・取引先を検索..." id="searchBox" oninput="applyFilters()">
-  </div>
-  <div class="tb-right">
-    <span class="tb-alert" id="tbAlert">0件 要発注</span>
-    <button class="tb-btn" onclick="manualLoadFromDrive()" title="サーバーから最新データを読み込みます">☁️ 最新読込</button>
-    <button class="tb-btn" onclick="exportData()" title="手動でローカルPCにJSON保存します">💾 バックアップ</button>
-    <label class="tb-btn" style="cursor:pointer;" title="ローカルのJSONからデータを復元します">📂 復元<input type="file" accept="application/json" style="display:none" onchange="importData(event)"></label>
-  </div>
-</div>
-
-<div id="body">
-  <div id="sidebar">
-    <div class="sb-section">
-      <div class="sb-label">メニュー</div>
-      <div class="nav-item active" id="nav-dash" onclick="switchPage('dash')"><span class="ni">📊</span>ダッシュボード</div>
-      <div class="nav-item" id="nav-inv" onclick="switchPage('inv')">
-        <span class="ni">📦</span>在庫一覧
-        <span class="nav-badge" id="sideBadge" style="display:none">0</span>
-      </div>
-      <div class="nav-item" id="nav-add" onclick="switchPage('add')"><span class="ni">➕</span>新規登録</div>
-      <div class="nav-item" id="nav-hist" onclick="switchPage('hist')"><span class="ni">🕒</span>入出庫履歴</div>
+<!-- ═══════════════════ ヘッダー -->
+<header>
+  <a class="h-logo" href="index.html">
+    <span class="h-logo-icon">🏭</span>
+    <div>
+      <div class="h-logo-name">東武<span> 業務システム</span></div>
+      <div class="h-logo-sub">Operations Portal</div>
     </div>
-    <div class="sb-divider"></div>
-    <div class="drive-status warn" id="driveStatus">
-      <span id="driveStatusIcon">☁️</span><span id="driveStatusText">未接続</span>
-    </div>
-    <div class="sb-section">
-      <div class="sb-label">絞り込み</div>
-      <div class="sb-filter">
-        <div class="sb-filter-title" style="margin-top:0;">取引先</div>
-        <select class="sb-select" id="fCo" onchange="applyFilters()"><option value="">すべて</option></select>
-        <div class="sb-filter-title">材質</div>
-        <select class="sb-select" id="fMat" onchange="applyFilters()"><option value="">すべて</option></select>
-        <div class="sb-filter-title">ステータス</div>
-        <select class="sb-select" id="fSt" onchange="applyFilters()">
-          <option value="">すべて</option>
-          <option value="alert">🚨 要発注のみ</option>
-          <option value="ok">✅ 正常のみ</option>
-        </select>
-      </div>
-    </div>
+  </a>
+  <div class="h-sep"></div>
+  <span class="h-tagline">業務アプリケーション ポータル</span>
+  <div class="h-right">
+    <span class="h-date" id="clockEl"></span>
   </div>
-  <div id="sb-backdrop" onclick="toggleSidebar()"></div>
+</header>
 
-  <div id="content">
+<!-- ═══════════════════ メイン -->
+<main>
 
-    <div class="page active" id="page-dash">
-      <div class="dash-inner">
-        <div class="kpi-grid">
-          <div class="kpi-card blue"><div class="kpi-icon">📦</div><div class="kpi-val" id="kpi-total">0</div><div class="kpi-lbl">登録品目数</div></div>
-          <div class="kpi-card red"><div class="kpi-icon">🚨</div><div class="kpi-val" id="kpi-alert">0</div><div class="kpi-lbl">要発注件数</div></div>
-          <div class="kpi-card green"><div class="kpi-icon">🏢</div><div class="kpi-val" id="kpi-co">0</div><div class="kpi-lbl">取引先数</div></div>
-          <div class="kpi-card yellow"><div class="kpi-icon">💎</div><div class="kpi-val" id="kpi-mat">0</div><div class="kpi-lbl">材質種類</div></div>
+  <!-- ヒーロー -->
+  <div class="hero">
+    <div class="hero-badge">🏭 東武 Operations</div>
+    <h1 class="hero-title">業務システム<span>ポータル</span></h1>
+    <p class="hero-desc">各種業務アプリケーションへのアクセス拠点です。<br>利用するシステムを選択してください。</p>
+  </div>
+
+  <!-- アプリカード -->
+  <div class="app-grid">
+
+    <!-- 在庫管理 -->
+    <a class="app-card blue" href="https://karikariyadokari.github.io/Inventory_Management_System/inventory_management.html">
+      <div class="card-bar"></div>
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="card-icon-wrap">🔩</div>
+          <span class="card-arrow">→</span>
         </div>
-        <div class="dash-cols">
-          <div class="card">
-            <div class="card-hd">🚨 要発注アイテム <span id="alertN" style="background:var(--c-red);color:#fff;font-size:11px;padding:1px 7px;border-radius:10px;"></span></div>
-            <div class="card-body" id="alertTable"></div>
+        <div class="card-title">在庫管理システム</div>
+        <div class="card-desc">部品・材料の在庫数をリアルタイムで管理。入出庫登録、発注点アラート、図面PDF管理、Google Drive同期に対応。</div>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="tag">在庫</span>
+            <span class="tag">入出庫</span>
+            <span class="tag">Drive同期</span>
           </div>
-          <div class="card">
-            <div class="card-hd">🕒 最近の入出庫</div>
-            <div class="card-body" id="recentLog"></div>
+          <span class="card-launch">起動 →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 商品原価管理 -->
+    <a class="app-card green" href="https://karikariyadokari.github.io/Inventory_Management_System/cost_table.html">
+      <div class="card-bar"></div>
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="card-icon-wrap">💴</div>
+          <span class="card-arrow">→</span>
+        </div>
+        <div class="card-title">商品原価管理システム</div>
+        <div class="card-desc">加工・材料・外注コストを一元管理。L1/M/HQ/G/L2/M2 の原価を自動集計し、CSV出力・Drive同期も可能。</div>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="tag">原価</span>
+            <span class="tag">加工費</span>
+            <span class="tag">Drive同期</span>
           </div>
+          <span class="card-launch">起動 →</span>
         </div>
       </div>
-    </div>
+    </a>
 
-    <div class="page" id="page-inv">
-      <div class="inv-bar">
-        <span class="count-chip" id="invCount">0件</span>
-        <button class="btn btn-ghost btn-sm" id="alertToggle" onclick="toggleAlertOnly()">🚨 要発注のみ</button>
-        <div class="bar-right">
-          <button class="btn btn-primary btn-sm" onclick="switchPage('add')">＋ 新規登録</button>
-          <button class="btn btn-ghost btn-sm" onclick="exportCSV()">📊 CSV出力</button>
-        </div>
-      </div>
-      <div class="tbl-wrap">
-        <table class="itbl">
-          <thead>
-            <tr>
-              <th onclick="sortBy('tag')" id="th-tag">タグ<span class="sort-arrow">⇅</span></th>
-              <th onclick="sortBy('company')" id="th-company">取引先名<span class="sort-arrow">⇅</span></th>
-              <th onclick="sortBy('internalNo')" id="th-internalNo">社内製番<span class="sort-arrow">⇅</span></th>
-              <th onclick="sortBy('seiban')" id="th-seiban">製番<span class="sort-arrow">⇅</span></th>
-              <th onclick="sortBy('partNumber')" id="th-partNumber">図面番号<span class="sort-arrow">⇅</span></th>
-              <th onclick="sortBy('name')" id="th-name">品名<span class="sort-arrow">⇅</span></th>
-              <th onclick="sortBy('material')" id="th-material">材質<span class="sort-arrow">⇅</span></th>
-              <th onclick="sortBy('price')" id="th-price">単価<span class="sort-arrow">⇅</span></th>
-              <th onclick="sortBy('qty')" id="th-qty">在庫数<span class="sort-arrow">⇅</span></th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="invBody"></tbody>
-        </table>
-      </div>
-    </div>
+  </div><!-- /app-grid -->
 
-    <div class="page" id="page-add">
-      <div class="form-wrap">
-        <div class="form-title" id="formTitle">📋 新規在庫登録</div>
-        <div class="form-card">
-          <div class="form-card-hd">🏢 管理情報</div>
-          <div class="form-grid">
-            <div class="form-row c4">
-              <div class="form-field">
-                <label class="form-label">タグ</label>
-                <input type="number" class="form-input" id="f-tag" placeholder="自動採番" min="1">
-              </div>
-              <div class="form-field">
-                <label class="form-label">取引先名<span class="req">*</span></label>
-                <input type="text" class="form-input" id="f-company" list="dl-co" placeholder="例: オリエント工機(株)">
-                <datalist id="dl-co"></datalist>
-              </div>
-              <div class="form-field">
-                <label class="form-label">社内製番</label>
-                <input type="text" class="form-input" id="f-internalNo" placeholder="例: A-0001">
-              </div>
-              <div class="form-field">
-                <label class="form-label">製番</label>
-                <input type="text" class="form-input" id="f-seiban" placeholder="例: 2024-001">
-              </div>
-            </div>
-            <div class="form-row c3">
-              <div class="form-field">
-                <label class="form-label">図面番号<span class="req">*</span></label>
-                <input type="text" class="form-input" id="f-partno" placeholder="例: OW-12345">
-              </div>
-              <div class="form-field">
-                <label class="form-label">品名<span class="req">*</span></label>
-                <input type="text" class="form-input" id="f-name" placeholder="例: シャフト">
-              </div>
-              <div class="form-field">
-                <label class="form-label">材質</label>
-                <input type="text" class="form-input" id="f-material" list="dl-mat" placeholder="例: SCM415">
-                <datalist id="dl-mat"></datalist>
-              </div>
-            </div>
-            <div class="form-row c4">
-              <div class="form-field">
-                <label class="form-label">単価（円）</label>
-                <input type="number" class="form-input" id="f-price" placeholder="0" min="0">
-              </div>
-              <div class="form-field">
-                <label class="form-label">初期在庫数<span class="req">*</span></label>
-                <input type="number" class="form-input" id="f-qty" placeholder="0" min="0">
-              </div>
-              <div class="form-field">
-                <label class="form-label">発注点（適正在庫）</label>
-                <input type="number" class="form-input" id="f-minqty" placeholder="0" min="0">
-                <span class="form-hint">在庫 ≤ この値で⚠ 警告</span>
-              </div>
-              <div class="form-field">
-                <label class="form-label">保管場所</label>
-                <input type="text" class="form-input" id="f-location" placeholder="例: A棚-3段">
-              </div>
-            </div>
-            <div class="form-row c1">
-              <div class="form-field">
-                <label class="form-label">備考</label>
-                <input type="text" class="form-input" id="f-note" placeholder="メモ・特記事項など">
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="form-card">
-          <div class="form-card-hd">📄 図面PDF（サーバーに保存）</div>
-          <div class="form-grid">
-            <div class="form-row c1">
-              <div class="form-field">
-                <div class="pdf-drop" id="pdfDrop" onclick="document.getElementById('f-pdf').click()">
-                  <span id="pdfLabel">📄 クリックまたはドラッグ＆ドロップでPDFを追加</span>
-                </div>
-                <input type="file" id="f-pdf" accept="application/pdf" style="display:none" onchange="onPdfSel(this)">
-                <div id="existingPdfLink" style="display:none;margin-top:8px;">
-                  <a id="existingPdfAnchor" href="#" target="_blank" class="btn btn-ghost btn-sm">📄 現在の図面PDFを開く</a>
-                  <button class="btn btn-danger btn-sm" onclick="removePdfLink()">削除</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-ghost" onclick="resetForm()">キャンセル</button>
-          <button class="btn btn-primary" id="submitBtn" onclick="submitForm()">✅ 登録する</button>
-        </div>
+  <!-- インフォバー -->
+  <div class="info-bar">
+    <div class="info-bar-hd">📋 システム情報</div>
+    <div class="info-list">
+      <div class="info-item">
+        <div class="info-dot blue"></div>
+        <span class="info-text">各アプリのデータは Google Drive へ自動同期されます（更新後3秒）</span>
+        <span class="info-date">常時</span>
       </div>
-    </div>
-
-    <div class="page" id="page-hist">
-      <div class="hist-bar">
-        <select class="hist-sel" id="histOp" onchange="renderHistory()">
-          <option value="">すべての操作</option>
-          <option value="入庫">📥 入庫</option>
-          <option value="出庫">📤 出庫</option>
-          <option value="新規登録">🆕 新規登録</option>
-          <option value="削除">🗑 削除</option>
-          <option value="編集">✏️ 編集</option>
-        </select>
-        <select class="hist-sel" id="histCo" onchange="renderHistory()"><option value="">すべての取引先</option></select>
-        <span class="hist-cnt" id="histCnt"></span>
-        <div style="flex:1;"></div>
-        <button class="btn btn-danger btn-sm" onclick="clearHistory()">🗑 全削除</button>
+      <div class="info-item">
+        <div class="info-dot green"></div>
+        <span class="info-text">オフライン時はローカルに保存し、次回接続時に同期します</span>
+        <span class="info-date">常時</span>
       </div>
-      <div class="hist-list" id="histList"></div>
-    </div>
-
-  </div></div><div id="mnav">
-  <div class="mn-item active" id="mn-dash" onclick="switchPage('dash')"><span class="mni">📊</span><span>ダッシュ</span></div>
-  <div class="mn-item" id="mn-inv" onclick="switchPage('inv')">
-    <span class="mni">📦</span><span>在庫</span>
-    <span class="mn-badge" id="mnBadge" style="display:none"></span>
-  </div>
-  <div class="mn-item" id="mn-add" onclick="switchPage('add')"><span class="mni">➕</span><span>登録</span></div>
-  <div class="mn-item" id="mn-hist" onclick="switchPage('hist')"><span class="mni">🕒</span><span>履歴</span></div>
-</div>
-
-</div><div class="overlay" id="stockModal">
-  <div class="modal">
-    <div class="modal-hd">
-      <div class="modal-title" id="sm-title">入出庫</div>
-      <button class="modal-close" onclick="closeModal('stockModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="sm-ctx">
-        <div class="sm-pn" id="sm-pn"></div>
-        <div class="sm-name" id="sm-name"></div>
-        <div class="sm-meta" id="sm-meta"></div>
+      <div class="info-item">
+        <div class="info-dot yellow"></div>
+        <span class="info-text">複数端末から同時更新すると衝突検知ダイアログが表示されます</span>
+        <span class="info-date">注意</span>
       </div>
-      <div class="mode-tabs">
-        <button class="mode-tab active in" id="mt-in" onclick="setMode(1)">📥 入庫</button>
-        <button class="mode-tab out" id="mt-out" onclick="setMode(-1)">📤 出庫</button>
-      </div>
-      <div class="qty-row">
-        <button class="qty-step" onclick="stepQ(-1)">－</button>
-        <input type="number" class="qty-inp" id="smQty" value="1" min="1" oninput="updatePreview()">
-        <button class="qty-step" onclick="stepQ(1)">＋</button>
-      </div>
-      <div class="sm-preview" id="smPrev"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('stockModal')">キャンセル</button>
-      <button class="btn btn-primary" id="smConfirm" onclick="confirmStock()">確定</button>
     </div>
   </div>
-</div>
 
-<div class="overlay" id="detailModal">
-  <div class="modal" style="max-width:520px;">
-    <div class="modal-hd">
-      <div class="modal-title" id="dd-title">詳細</div>
-      <button class="modal-close" onclick="closeModal('detailModal')">✕</button>
-    </div>
-    <div class="modal-body" id="dd-body"></div>
-    <div class="modal-footer" id="dd-footer"></div>
-  </div>
-</div>
+</main>
 
-<div class="toast" id="toast"></div>
-
-<div class="pdf-progress" id="pdfProgress">
-  <div id="pdfProgressText">📤 サーバーへ送信中...</div>
-  <div class="pdf-prog-bar"><div class="pdf-prog-fill" id="pdfProgFill"></div></div>
-</div>
+<!-- ═══════════════════ フッター -->
+<footer>
+  &copy; 東武 業務システム — All rights reserved
+</footer>
 
 <script>
-// ==========================================
-// ★ ここにGASでデプロイした「ウェブアプリのURL」を貼り付けます ★
-// ==========================================
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbylx89GWXes1YV1CuyDPjtXB2OAKyonwtBa-LaYfJhFld4BHtgbssUa4ZguDMIGeo8W/exec';
-
-let data = JSON.parse(localStorage.getItem('inv_v7') || '{"inventory":[],"logs":[]}');
-let dataTimestamp = 0;
-let syncTimer = null;
-let isSyncing = false;
-let pendingSync = false;
-
-// アプリ起動
-window.onload = () => {
-  boot();
-  loadDataFromDrive();
-};
-
-function updateSyncStatus(status, text) {
-  const el = document.getElementById('driveStatus');
-  const tx = document.getElementById('driveStatusText');
-  const ic = document.getElementById('driveStatusIcon');
-  if (status === 'ok') {
-    el.className = 'drive-status ok';
-    ic.textContent = '☁️';
-    tx.textContent = text || '同期済み';
-  } else if (status === 'syncing') {
-    el.className = 'drive-status warn';
-    ic.textContent = '⏳';
-    tx.textContent = text || '同期待機中...';
-  } else if (status === 'err') {
-    el.className = 'drive-status err';
-    ic.textContent = '⚠️';
-    tx.textContent = text || '同期エラー';
-  }
+// リアルタイム時計
+function updateClock() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  document.getElementById('clockEl').textContent =
+    `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
-
-// データ保存と3秒後の同期予約
-function save() {
-  try { localStorage.setItem('inv_v7', JSON.stringify(data)); } catch(e) {}
-  renderAll();
-
-  updateSyncStatus('syncing', '3秒後に同期...');
-  clearTimeout(syncTimer);
-  syncTimer = setTimeout(() => syncToDrive(false), 3000);
-}
-
-// サーバーからデータ読み込み
-async function loadDataFromDrive() {
-  updateSyncStatus('syncing', '読込中...');
-  try {
-    const res = await fetch(GAS_URL);
-    const json = await res.json();
-    if (json.data && json.data.inventory) {
-      data = json.data;
-      dataTimestamp = json.timestamp || 0;
-      localStorage.setItem('inv_v7', JSON.stringify(data));
-      renderAll();
-      updateSyncStatus('ok', '同期済み');
-      showToast('☁️ 最新データを読み込みました');
-    } else {
-      updateSyncStatus('ok', '同期済み'); // 初回
-    }
-  } catch (e) {
-    console.error(e);
-    updateSyncStatus('err', '読込エラー');
-  }
-}
-
-// サーバーへデータ保存（衝突検知あり）
-async function syncToDrive(force) {
-  if (isSyncing) {
-    pendingSync = true;
-    return;
-  }
-  isSyncing = true;
-  updateSyncStatus('syncing', '保存中...');
-
-  try {
-    const payload = {
-      action: 'save',
-      data: data,
-      timestamp: dataTimestamp,
-      force: force
-    };
-    const res = await fetch(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-    const result = await res.json();
-
-    if (result.status === 'conflict') {
-      isSyncing = false;
-      if (confirm('⚠️ データの衝突を検知しました\n他のデバイスでデータが更新されています。\n\n[OK] 最新データを読み込む (未保存の変更は破棄されます)\n[キャンセル] あなたの変更で上書きする')) {
-        data = result.data;
-        dataTimestamp = result.timestamp;
-        localStorage.setItem('inv_v7', JSON.stringify(data));
-        renderAll();
-        updateSyncStatus('ok', '同期済み');
-      } else {
-        syncToDrive(true); // 強制上書き
-      }
-      return;
-    }
-
-    if (result.status === 'ok') {
-      dataTimestamp = result.timestamp;
-      updateSyncStatus('ok', '同期完了');
-      showToast('☁️ 同期完了');
-    }
-  } catch (err) {
-    console.error(err);
-    updateSyncStatus('err', '保存エラー');
-    showToast('⚠️ 同期エラー');
-  } finally {
-    isSyncing = false;
-    if (pendingSync) {
-      pendingSync = false;
-      syncTimer = setTimeout(() => syncToDrive(false), 1000);
-    }
-  }
-}
-
-async function manualLoadFromDrive() {
-  if (confirm('最新データを読み込みますか？\n※ローカルで同期待ちの変更がある場合、上書きされて消えてしまいます。')) {
-    await loadDataFromDrive();
-  }
-}
-
-// PDFの処理（GASにBase64で送信）
-async function uploadPdfToDrive(file, fileName) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      showPdfProgress(50, '📤 送信中...');
-      const base64 = e.target.result.split(',')[1];
-      const payload = {
-        action: 'uploadPdf',
-        name: fileName,
-        base64: base64
-      };
-      
-      try {
-        const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
-        const result = await res.json();
-        hidePdfProgress();
-        if (result.status === 'ok') {
-          resolve({ id: result.fileId, webViewLink: result.webViewLink });
-        } else {
-          reject(new Error('サーバーエラー'));
-        }
-      } catch(err) {
-        hidePdfProgress();
-        reject(err);
-      }
-    };
-    reader.onerror = () => reject(new Error('読み込みエラー'));
-    reader.readAsDataURL(file);
-  });
-}
-
-// PDFの更新処理
-async function updatePdfInDrive(fileId, file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      showPdfProgress(50, '📤 更新中...');
-      const base64 = e.target.result.split(',')[1];
-      const payload = {
-        action: 'uploadPdf',
-        name: file.name,
-        base64: base64,
-        updateFileId: fileId
-      };
-      
-      try {
-        const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
-        const result = await res.json();
-        hidePdfProgress();
-        if (result.status === 'ok') {
-          resolve({ id: result.fileId, webViewLink: result.webViewLink });
-        } else {
-          reject(new Error('サーバーエラー'));
-        }
-      } catch(err) {
-        hidePdfProgress();
-        reject(err);
-      }
-    };
-    reader.onerror = () => reject(new Error('読み込みエラー'));
-    reader.readAsDataURL(file);
-  });
-}
-
-// PDFの削除
-async function deleteDriveFile(fileId) {
-  if (!fileId) return;
-  fetch(GAS_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'deletePdf', fileId: fileId })
-  }).catch(() => {}); // バックグラウンドで削除
-}
-
-function showPdfProgress(pct, msg) {
-  const el = document.getElementById('pdfProgress');
-  el.classList.add('show');
-  document.getElementById('pdfProgressText').textContent = msg;
-  document.getElementById('pdfProgFill').style.width = pct + '%';
-}
-function hidePdfProgress() { document.getElementById('pdfProgress').classList.remove('show'); }
-
-// ══════════════════════════════════════════════════════════════
-// アプリ本体のロジック（以下変更なし）
-// ══════════════════════════════════════════════════════════════
-
-const COMPANIES = ['オリエント工機(株)','(株)アイテック','(株)日清エンジニアリング','(株)児嶋鉄工所','三ツ星ベルト販売(株)','新興機械工業(株)','(株)正栄製作所（法）','(株)正栄製作所（庄）','(株)不二鉄工所','日立造船(株)','住友精密工業(株)'];
-let editId = null, pendingPdf = null, stockTarget = null, stockSign = 1;
-let alertOnly = false, sortCol = 'tag', sortDir = 1;
-let removePdfFlag = false;
-
-function boot() { buildLists(); renderAll(); }
-function renderAll() { buildLists(); renderDash(); renderInv(); renderHistory(); updateBadges(); }
-
-function buildLists() {
-  const cos  = [...new Set([...COMPANIES, ...data.inventory.map(i=>i.company).filter(Boolean)])].sort();
-  const mats = [...new Set(data.inventory.map(i=>i.material).filter(Boolean))].sort();
-  document.getElementById('dl-co').innerHTML  = cos.map(c=>`<option value="${esc(c)}">`).join('');
-  document.getElementById('dl-mat').innerHTML = mats.map(m=>`<option value="${esc(m)}">`).join('');
-  setSelect('fCo',  '<option value="">すべて</option>'  + cos.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join(''));
-  setSelect('fMat', '<option value="">すべて</option>'  + mats.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join(''));
-  setSelect('histCo','<option value="">すべての取引先</option>' + cos.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join(''));
-}
-function setSelect(id, html) { const el = document.getElementById(id), v = el.value; el.innerHTML = html; el.value = v; }
-
-function updateBadges() {
-  const n = data.inventory.filter(i => i.minQty > 0 && i.qty <= i.minQty).length;
-  const show = n > 0;
-  const tb = document.getElementById('tbAlert');
-  tb.style.display = show ? '' : 'none'; tb.textContent = n + '件 要発注';
-  const sb = document.getElementById('sideBadge');
-  sb.style.display = show ? '' : 'none'; sb.textContent = n;
-  const mb = document.getElementById('mnBadge');
-  mb.style.display = show ? '' : 'none'; mb.textContent = n;
-}
-
-function getFiltered() {
-  const q   = (document.getElementById('searchBox').value||'').toLowerCase();
-  const co  = document.getElementById('fCo').value;
-  const mat = document.getElementById('fMat').value;
-  const st  = document.getElementById('fSt').value;
-  return data.inventory.filter(i => {
-    if (q && !['company','internalNo','seiban','partNumber','name','material','location','note'].some(k => String(i[k]||'').toLowerCase().includes(q))) return false;
-    if (co  && i.company  !== co)  return false;
-    if (mat && i.material !== mat) return false;
-    if (st === 'alert' && !(i.minQty > 0 && i.qty <= i.minQty)) return false;
-    if (st === 'ok'    &&   i.minQty > 0 && i.qty <= i.minQty)  return false;
-    return true;
-  });
-}
-function applyFilters() { renderInv(); }
-
-function renderDash() {
-  const inv = data.inventory;
-  const alerts = inv.filter(i => i.minQty > 0 && i.qty <= i.minQty);
-  document.getElementById('kpi-total').textContent = inv.length;
-  document.getElementById('kpi-alert').textContent = alerts.length;
-  document.getElementById('kpi-co').textContent    = new Set(inv.map(i=>i.company).filter(Boolean)).size;
-  document.getElementById('kpi-mat').textContent   = new Set(inv.map(i=>i.material).filter(Boolean)).size;
-  document.getElementById('alertN').textContent = alerts.length || '';
-
-  const at = document.getElementById('alertTable');
-  at.innerHTML = !alerts.length
-    ? '<div class="empty"><div class="ei">✅</div><p>要発注なし</p></div>'
-    : '<table class="mini-tbl"><thead><tr><th>図面番号</th><th>品名</th><th>在庫</th><th>発注点</th></tr></thead><tbody>'
-      + alerts.map(i=>`<tr onclick="openDetail('${i.id}')"><td class="c-pn">${esc(i.partNumber||'-')}</td><td>${esc(i.name||'-')}</td><td style="color:var(--c-red);font-weight:700">${i.qty}</td><td>${i.minQty}</td></tr>`).join('')
-      + '</tbody></table>';
-
-  const rl = document.getElementById('recentLog');
-  const recent = data.logs.slice(0, 15);
-  const opMap = {'入庫':['in','📥'],'出庫':['out','📤'],'新規登録':['new','🆕'],'削除':['del','🗑'],'編集':['new','✏️']};
-  rl.innerHTML = !recent.length
-    ? '<div class="empty"><div class="ei">📭</div><p>履歴なし</p></div>'
-    : '<div class="timeline">' + recent.map(l => {
-        const [cls,ico] = opMap[l.operation] || ['new','📋'];
-        const isP = l.operation==='入庫'||l.operation==='新規登録';
-        const chg = typeof l.changeQty==='number' ? (l.changeQty>0?'+'+l.changeQty:String(l.changeQty)) : '';
-        return `<div class="tl-item"><div class="tl-dot ${cls}">${ico}</div><div class="tl-info"><div class="tl-name">${esc(l.name||l.partNumber||'-')}</div><div class="tl-meta">${esc(l.company||'-')} ${l.material?'· '+esc(l.material):''}</div></div><div class="tl-right"><div class="tl-chg ${isP?'plus':'minus'}">${chg||l.operation}</div><div class="tl-time">${l.date}</div></div></div>`;
-      }).join('') + '</div>';
-}
-
-function sortBy(col) {
-  sortDir = sortCol === col ? -sortDir : 1;
-  sortCol = col;
-  document.querySelectorAll('.itbl thead th').forEach(th => th.classList.remove('sorted'));
-  const th = document.getElementById('th-' + col);
-  if (th) th.classList.add('sorted');
-  renderInv();
-}
-
-function renderInv() {
-  let items = getFiltered();
-  items.sort((a, b) => {
-    let av = a[sortCol] ?? '', bv = b[sortCol] ?? '';
-    if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * sortDir;
-    return String(av).localeCompare(String(bv), 'ja') * sortDir;
-  });
-  document.getElementById('invCount').textContent = items.length + '件';
-  const toggle = document.getElementById('alertToggle');
-  toggle.classList.toggle('btn-primary', alertOnly);
-  toggle.classList.toggle('btn-ghost', !alertOnly);
-
-  const body = document.getElementById('invBody');
-  if (!items.length) {
-    body.innerHTML = '<tr><td colspan="10"><div class="empty"><div class="ei">📭</div><p>一致する在庫なし</p></div></td></tr>';
-    return;
-  }
-  body.innerHTML = items.map(i => {
-    const w = i.minQty > 0 && i.qty <= i.minQty;
-    const p = i.price > 0 ? '¥' + Number(i.price).toLocaleString() : '-';
-    return `<tr class="${w?'alert-row':''}" ondblclick="openDetail('${i.id}')">
-      <td class="c-tag">${i.tag||'-'}</td>
-      <td class="c-co" title="${esc(i.company||'')}">${esc(i.company||'-')}</td>
-      <td style="font-family:var(--mono);font-size:12px;color:var(--c-text2)">${esc(i.internalNo||'-')}</td>
-      <td style="font-family:var(--mono);font-size:12px;color:var(--c-text2)">${esc(i.seiban||'-')}</td>
-      <td class="c-pn">${esc(i.partNumber||'-')}</td>
-      <td class="c-name" title="${esc(i.name||'')}">${esc(i.name||'-')}</td>
-      <td>${i.material?`<span class="c-mat">${esc(i.material)}</span>`:'-'}</td>
-      <td class="c-price">${p}</td>
-      <td class="c-qty ${w?'warn':'ok'}">${i.qty}${w?'<span class="badge-alert">要発注</span>':''}</td>
-      <td class="c-act">
-        <button class="btn btn-green btn-sm" onclick="openStock('${i.id}',1,event)" title="入庫">📥</button>
-        <button class="btn btn-danger btn-sm" onclick="openStock('${i.id}',-1,event)" title="出庫">📤</button>
-        <button class="btn btn-ghost btn-sm" onclick="openDetail('${i.id}',event)">詳細</button>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-function toggleAlertOnly() { alertOnly = !alertOnly; applyFilters(); }
-
-function openDetail(id, evt) {
-  if (evt) evt.stopPropagation();
-  const i = data.inventory.find(x => x.id === id);
-  if (!i) return;
-  const w = i.minQty > 0 && i.qty <= i.minQty;
-  document.getElementById('dd-title').textContent = i.partNumber || i.name || '詳細';
-
-  let pdfBtn = '';
-  if (i.driveFileId) {
-    pdfBtn = `<a href="${esc(i.driveWebViewLink||'#')}" target="_blank" class="btn btn-ghost" style="width:100%;margin-bottom:10px;display:flex;justify-content:center;">📄 図面PDFを開く（※権限が必要です）</a>`;
-  }
-
-  document.getElementById('dd-body').innerHTML = `
-    <div class="detail-qty">
-      <div class="dq-num ${w?'warn':'ok'}">${i.qty}</div>
-      <div class="dq-sub">現在庫数 ${w?'⚠ 要発注':''} ${i.minQty>0?'/ 発注点: '+i.minQty:''}</div>
-    </div>
-    <div class="detail-grid">
-      ${df('タグ', i.tag)} ${df('取引先名', i.company)}
-      ${df('社内製番', i.internalNo, 'mono')} ${df('製番', i.seiban, 'mono')}
-      ${df('図面番号', i.partNumber, 'mono')} ${df('品名', i.name)}
-      ${df('材質', i.material)} ${df('単価', i.price>0?'¥'+Number(i.price).toLocaleString():null)}
-      ${df('保管場所', i.location)} ${df('備考', i.note)}
-    </div>
-    ${pdfBtn}`;
-  document.getElementById('dd-footer').innerHTML = `
-    <button class="btn btn-ghost" onclick="closeModal('detailModal');editItem('${i.id}')">✏️ 編集</button>
-    <button class="btn btn-green" onclick="closeModal('detailModal');openStock('${i.id}',1)">📥 入庫</button>
-    <button class="btn btn-danger" onclick="closeModal('detailModal');openStock('${i.id}',-1)">📤 出庫</button>
-    <button class="btn btn-ghost" style="color:var(--c-red);" onclick="closeModal('detailModal');deleteItem('${i.id}')">🗑 削除</button>`;
-  openModal('detailModal');
-}
-function df(label, val, cls='') {
-  if (val===null||val===undefined||val===''||val===0) return '';
-  return `<div class="df"><div class="dl">${label}</div><div class="dv ${cls}">${esc(String(val))}</div></div>`;
-}
-
-function openStock(id, sign, evt) {
-  if (evt) evt.stopPropagation();
-  stockTarget = data.inventory.find(i => i.id === id);
-  if (!stockTarget) return;
-  stockSign = sign;
-  document.getElementById('sm-pn').textContent   = stockTarget.partNumber || '-';
-  document.getElementById('sm-name').textContent = stockTarget.name || '';
-  document.getElementById('sm-meta').textContent = (stockTarget.company||'-') + ' / 現在庫: ' + stockTarget.qty;
-  document.getElementById('smQty').value = 1;
-  setMode(sign);
-  openModal('stockModal');
-  setTimeout(() => document.getElementById('smQty').select(), 100);
-}
-function setMode(s) {
-  stockSign = s;
-  document.getElementById('mt-in').classList.toggle('active', s > 0);
-  document.getElementById('mt-out').classList.toggle('active', s < 0);
-  document.getElementById('smConfirm').textContent = s > 0 ? '📥 入庫する' : '📤 出庫する';
-  updatePreview();
-}
-function stepQ(d) { const el = document.getElementById('smQty'); el.value = Math.max(1,(parseInt(el.value)||0)+d); updatePreview(); }
-function updatePreview() {
-  if (!stockTarget) return;
-  const q = parseInt(document.getElementById('smQty').value) || 0;
-  const nq = stockTarget.qty + stockSign * q;
-  const w = stockTarget.minQty > 0 && nq <= stockTarget.minQty;
-  const cls = nq < 0 ? 'warn' : w ? 'warn' : 'ok';
-  document.getElementById('smPrev').innerHTML = `現在庫 <span class="pv" style="color:var(--c-text)">${stockTarget.qty}</span> → <span class="pv ${cls}">${nq}</span>${nq<0?'<span style="color:var(--c-red);font-size:11px;margin-left:6px;">⚠ 在庫不足</span>':w?'<span style="color:var(--c-red);font-size:11px;margin-left:6px;">⚠ 発注点以下</span>':''}`;
-}
-function confirmStock() {
-  const q = parseInt(document.getElementById('smQty').value);
-  if (!q || q <= 0) { showToast('数量を入力してください'); return; }
-  if (stockSign < 0 && stockTarget.qty < q) { showToast('⚠ 在庫数が不足しています'); return; }
-  stockTarget.qty += stockSign * q;
-  addLog(stockTarget, stockSign > 0 ? '入庫' : '出庫', stockSign * q);
-  save();
-  closeModal('stockModal');
-  showToast((stockSign>0?'📥 入庫':'📤 出庫') + ' ' + q + '個 完了');
-}
-
-function resetForm() {
-  editId = null; pendingPdf = null; removePdfFlag = false;
-  document.getElementById('formTitle').textContent = '📋 新規在庫登録';
-  document.getElementById('submitBtn').textContent = '✅ 登録する';
-  ['f-tag','f-company','f-internalNo','f-seiban','f-partno','f-name','f-material','f-price','f-qty','f-minqty','f-location','f-note']
-    .forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('f-pdf').value='';
-  document.getElementById('pdfLabel').textContent='📄 クリックまたはドラッグ＆ドロップでPDFを追加\n';
-  document.getElementById('pdfDrop').classList.remove('has','uploading');
-  document.getElementById('existingPdfLink').style.display = 'none';
-}
-function editItem(id) {
-  const i = data.inventory.find(x=>x.id===id);
-  if (!i) return;
-  editId = id; removePdfFlag = false;
-  switchPage('add');
-  document.getElementById('formTitle').textContent='✏️ 在庫編集';
-  document.getElementById('submitBtn').textContent='💾 更新する';
-  const s = (fid,val) => { const el=document.getElementById(fid); if(el) el.value=val||''; };
-  s('f-tag',i.tag); s('f-company',i.company); s('f-internalNo',i.internalNo);
-  s('f-seiban',i.seiban); s('f-partno',i.partNumber); s('f-name',i.name);
-  s('f-material',i.material); s('f-price',i.price||''); s('f-qty',i.qty);
-  s('f-minqty',i.minQty); s('f-location',i.location); s('f-note',i.note);
-
-  if (i.driveFileId) {
-    document.getElementById('pdfLabel').textContent='📄 新しいPDFを選択すると上書きされます';
-    document.getElementById('pdfDrop').classList.add('has');
-    const link = document.getElementById('existingPdfLink');
-    link.style.display = 'flex'; link.style.gap = '8px'; link.style.alignItems = 'center';
-    document.getElementById('existingPdfAnchor').href = i.driveWebViewLink || '#';
-  }
-}
-function removePdfLink() {
-  removePdfFlag = true;
-  document.getElementById('existingPdfLink').style.display = 'none';
-  document.getElementById('pdfDrop').classList.remove('has');
-  document.getElementById('pdfLabel').textContent = '📄 クリックまたはドラッグ＆ドロップでPDFを追加';
-  showToast('PDFリンクを削除します（保存時に反映）');
-}
-function onPdfSel(inp) {
-  pendingPdf = inp.files[0]||null;
-  document.getElementById('pdfLabel').textContent = pendingPdf ? '📄 '+pendingPdf.name : '📄 クリックまたはドラッグ＆ドロップでPDFを追加';
-  document.getElementById('pdfDrop').classList.toggle('has', !!pendingPdf);
-}
-
-async function submitForm() {
-  const partno=v('f-partno'), name=v('f-name'), company=v('f-company');
-  if (!partno&&!name) { showToast('図面番号または品名を入力してください'); return; }
-  if (!company) { showToast('取引先名を入力してください'); return; }
-
-  document.getElementById('submitBtn').disabled = true;
-  document.getElementById('submitBtn').textContent = '⏳ 処理中...';
-
-  try {
-    const maxTag = data.inventory.length > 0 ? Math.max(...data.inventory.map(x=>parseInt(x.tag)||0)) : 0;
-    const tag = parseInt(v('f-tag')) || (editId ? (data.inventory.find(x=>x.id===editId)||{}).tag : maxTag+1);
-
-    let driveFileId = null, driveWebViewLink = null;
-
-    if (editId) {
-      const i = data.inventory.find(x=>x.id===editId);
-      if (!i) return;
-
-      if (pendingPdf) {
-        const fname = `${partno||name}_${Date.now()}.pdf`;
-        if (i.driveFileId) {
-          try {
-            const res = await updatePdfInDrive(i.driveFileId, pendingPdf);
-            driveFileId = res.id; driveWebViewLink = res.webViewLink;
-          } catch {
-            const res = await uploadPdfToDrive(pendingPdf, fname);
-            driveFileId = res.id; driveWebViewLink = res.webViewLink;
-          }
-        } else {
-          const res = await uploadPdfToDrive(pendingPdf, fname);
-          driveFileId = res.id; driveWebViewLink = res.webViewLink;
-        }
-      } else if (removePdfFlag) {
-        if (i.driveFileId) deleteDriveFile(i.driveFileId);
-        driveFileId = null; driveWebViewLink = null;
-      } else {
-        driveFileId = i.driveFileId; driveWebViewLink = i.driveWebViewLink;
-      }
-
-      Object.assign(i, { tag, company, internalNo:v('f-internalNo'), seiban:v('f-seiban'), partNumber:partno, name, material:v('f-material'), price:parseFloat(v('f-price'))||0, qty:parseInt(v('f-qty'))||0, minQty:parseInt(v('f-minqty'))||0, location:v('f-location'), note:v('f-note'), driveFileId, driveWebViewLink });
-      addLog(i,'編集',0); save(); showToast('💾 更新: '+(name||partno));
-    } else {
-      if (pendingPdf) {
-        const fname = `${partno||name}_${Date.now()}.pdf`;
-        const res = await uploadPdfToDrive(pendingPdf, fname);
-        driveFileId = res.id; driveWebViewLink = res.webViewLink;
-      }
-      const id = Date.now().toString();
-      const item = { id, tag, company, internalNo:v('f-internalNo'), seiban:v('f-seiban'), partNumber:partno, name, material:v('f-material'), price:parseFloat(v('f-price'))||0, qty:parseInt(v('f-qty'))||0, minQty:parseInt(v('f-minqty'))||0, location:v('f-location'), note:v('f-note'), driveFileId, driveWebViewLink };
-      data.inventory.push(item);
-      addLog(item,'新規登録',item.qty); save(); showToast('✅ 登録: '+(name||partno));
-    }
-    resetForm(); switchPage('inv');
-  } catch (err) {
-    showToast('⚠ エラー: ' + err.message);
-    console.error(err);
-  } finally {
-    document.getElementById('submitBtn').disabled = false;
-    document.getElementById('submitBtn').textContent = editId ? '💾 更新する' : '✅ 登録する';
-  }
-}
-function v(id) { return (document.getElementById(id).value||'').trim(); }
-
-function deleteItem(id) {
-  if (!confirm('削除しますか？')) return;
-  const i=data.inventory.find(x=>x.id===id);
-  if (i) {
-    addLog(i,'削除',0);
-    if (i.driveFileId) deleteDriveFile(i.driveFileId);
-  }
-  data.inventory=data.inventory.filter(x=>x.id!==id);
-  save(); showToast('🗑 削除しました');
-}
-
-function renderHistory() {
-  const op=document.getElementById('histOp').value;
-  const co=document.getElementById('histCo').value;
-  const logs=data.logs.filter(l=>(!op||l.operation===op)&&(!co||l.company===co));
-  document.getElementById('histCnt').textContent=logs.length+'件';
-  const el=document.getElementById('histList');
-  const opMap={'入庫':['in','📥'],'出庫':['out','📤'],'新規登録':['new','🆕'],'削除':['del','🗑'],'編集':['new','✏️']};
-  el.innerHTML = !logs.length
-    ? '<div class="empty"><div class="ei">📭</div><p>履歴なし</p></div>'
-    : '<div class="timeline">' + logs.map(l=>{
-        const [cls,ico]=opMap[l.operation]||['new','📋'];
-        const isP=l.operation==='入庫'||l.operation==='新規登録';
-        const chg=typeof l.changeQty==='number'?(l.changeQty>0?'+'+l.changeQty:String(l.changeQty)):'';
-        return `<div class="tl-item"><div class="tl-dot ${cls}">${ico}</div><div class="tl-info"><div class="tl-name">${esc(l.name||l.partNumber||'-')}</div><div class="tl-meta">${esc(l.company||'-')} ${l.material?'· '+esc(l.material):''} · 図番: ${esc(l.partNumber||'-')} · 在庫: ${l.newQty}</div></div><div class="tl-right"><div class="tl-chg ${isP?'plus':'minus'}">${chg||l.operation}</div><div class="tl-time">${l.date}</div></div></div>`;
-      }).join('') + '</div>';
-}
-function clearHistory() { if(!confirm('履歴をすべて削除しますか？'))return; data.logs=[]; save(); showToast('🗑 履歴削除'); }
-
-function addLog(item, op, changeQty) {
-  const now=new Date();
-  const d=`${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-  data.logs.unshift({date:d,company:item.company||'-',partNumber:item.partNumber||'-',name:item.name||'-',material:item.material||'-',operation:op,changeQty,newQty:item.qty});
-  if(data.logs.length>3000) data.logs.pop();
-}
-
-function exportData() {
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download=`inventory_${new Date().toISOString().slice(0,10)}.json`; a.click();
-  showToast('💾 ローカルバックアップを保存しました');
-}
-function importData(e) {
-  const file=e.target.files[0]; if(!file)return;
-  const r=new FileReader();
-  r.onload=ev=>{ 
-    try { 
-      const d=JSON.parse(ev.target.result); 
-      if(!d.inventory) throw 0; 
-      data=d; 
-      save(); 
-      showToast('📂 復元完了: '+d.inventory.length+'件'); 
-    } catch { 
-      showToast('⚠ 読み込み失敗'); 
-    } 
-  };
-  r.readAsText(file); e.target.value='';
-}
-function exportCSV() {
-  const items=getFiltered();
-  const h=['タグ','取引先名','社内製番','製番','図面番号','品名','材質','単価','在庫数','発注点','保管場所','備考','DriveリンクURL'];
-  const rows=items.map(i=>[i.tag||'',i.company||'',i.internalNo||'',i.seiban||'',i.partNumber||'',i.name||'',i.material||'',i.price||0,i.qty,i.minQty||0,i.location||'',i.note||'',i.driveWebViewLink||''].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
-  const csv='\uFEFF'+[h.join(','),...rows].join('\n');
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download=`inventory_${new Date().toISOString().slice(0,10)}.csv`; a.click();
-  showToast('📊 CSV出力完了');
-}
-
-const PAGES=['dash','inv','add','hist'];
-function switchPage(p) {
-  PAGES.forEach(x=>{
-    document.getElementById('page-'+x).classList.toggle('active', x===p);
-    ['nav-','mn-'].forEach(pfx=>{const el=document.getElementById(pfx+x);if(el)el.classList.toggle('active',x===p);});
-  });
-  if (p!=='add') resetForm();
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sb-backdrop').classList.remove('show');
-}
-function toggleSidebar() {
-  const sb = document.getElementById('sidebar');
-  const bd = document.getElementById('sb-backdrop');
-  sb.classList.toggle('open');
-  bd.classList.toggle('show', sb.classList.contains('open'));
-}
-
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
-
-let toastTimer;
-function showToast(msg, duration = 2400) {
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'), duration);
-}
-
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-
-document.addEventListener('keydown', e=>{
-  if(e.key==='Escape') document.querySelectorAll('.overlay.open').forEach(el=>el.classList.remove('open'));
-});
-
-const pdrop=document.getElementById('pdfDrop');
-pdrop.addEventListener('dragover',e=>{e.preventDefault();pdrop.style.borderColor='var(--c-accent)';});
-pdrop.addEventListener('dragleave',()=>pdrop.style.borderColor='');
-pdrop.addEventListener('drop',e=>{
-  e.preventDefault(); pdrop.style.borderColor='';
-  const file=e.dataTransfer.files[0];
-  if(file&&file.type==='application/pdf'){
-    pendingPdf=file;
-    document.getElementById('pdfLabel').textContent='📄 '+file.name;
-    pdrop.classList.add('has');
-  }
-});
+updateClock();
+setInterval(updateClock, 1000);
 </script>
 </body>
 </html>
